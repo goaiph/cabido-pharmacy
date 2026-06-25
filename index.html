@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cabido RX — Pharmacy System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root {
+  /* Brand: #9DCF46 (lime green) · #52C3E3 (cyan blue) */
+  --g900: #111A04;
+  --g800: #1E2E07;
+  --g700: #2F480B;
+  --g600: #456912;
+  --g500: #608F1A;
+  --g400: #9DCF46;  /* ← brand green */
+  --g300: #B8DC78;
+  --g200: #D3ECA8;
+  --g100: #EAF5D0;
+  --g50:  #F4FAE8;
+
+  --slate900: #0D1117;
+  --slate800: #1C2431;
+  --slate700: #2D3748;
+  --slate500: #64748B;
+  --slate400: #94A3B8;
+  --slate300: #CBD5E1;
+  --slate200: #E2E8F0;
+  --slate100: #F1F5F9;
+  --white: #FFFFFF;
+
+  --amber: #F59E0B;
+  --amber-bg: #FFFBEB;
+  --red: #EF4444;
+  --red-bg: #FEF2F2;
+  --blue: #52C3E3;      /* ← brand cyan */
+  --blue-dark: #1E6F8F;
+  --blue-bg: #D9F3FA;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --sidebar-w: 240px;
+  --topbar-h: 58px;
+  --bottom-nav-h: 64px;
+
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 32px rgba(0,0,0,.14);
+}
+
+/* ═══════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overscroll-behavior: none; }
+body {
+  font-family: var(--font-body);
+  background: var(--slate100);
+  color: var(--slate900);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+input, select, button, textarea { font-family: var(--font-body); }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--slate300); border-radius: 4px; }
+
+/* ═══════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════ */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse at 15% 85%, rgba(157,207,70,.28) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 15%, rgba(82,195,227,.28) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(82,195,227,.08) 0%, transparent 70%),
+    linear-gradient(160deg, #0a1505 0%, #091418 60%, #071020 100%);
+}
+.login-card {
+  background: rgba(255,255,255,.97); border-radius: var(--r-xl);
+  width: 100%; max-width: 380px;
+  padding: 36px 32px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08);
+}
+.login-mark {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.login-mark-icon {
+  width: 58px; height: 58px; border-radius: 14px;
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(82,195,227,.25);
+  border: 1.5px solid rgba(82,195,227,.2);
+}
+.login-mark-text h1 {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 800;
+  background: linear-gradient(135deg, #456912 0%, #1E6F8F 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; line-height: 1.2;
+}
+.login-mark-text p { font-size: 12px; color: var(--slate400); margin-top: 2px; }
+.login-field { margin-bottom: 12px; }
+.login-field label {
+  display: block; font-size: 11px; font-weight: 700;
+  color: var(--slate500); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px;
+}
+.login-field select, .login-field input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--slate200); border-radius: var(--r-sm);
+  font-size: 14px; color: var(--slate900); background: var(--slate100);
+  outline: none; transition: border-color .18s, box-shadow .18s;
+}
+.login-field select:focus, .login-field input:focus {
+  border-color: #52C3E3; background: var(--white);
+  box-shadow: 0 0 0 3px rgba(82,195,227,.18);
+}
+.login-submit {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #9DCF46 0%, #72C03A 100%);
+  color: #1a2e04;
+  border: none; border-radius: var(--r-sm);
+  font-family: var(--font-display); font-size: 14px; font-weight: 800;
+  cursor: pointer; margin-top: 8px;
+  transition: all .18s;
+  box-shadow: 0 4px 14px rgba(157,207,70,.4);
+}
+.login-submit:hover {
+  background: linear-gradient(135deg, #aedd55 0%, #9DCF46 100%);
+  box-shadow: 0 6px 20px rgba(157,207,70,.5);
+  transform: translateY(-1px);
+}
+.login-submit:active { transform: translateY(0); }
+.login-hint { text-align: center; font-size: 11px; color: var(--slate400); margin-top: 10px; }
+
+/* ═══════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════ */
+#app {
+  display: none;
+  height: 100dvh;
+  position: relative;
+}
+
+/* ── SIDEBAR (desktop) ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--g900);
+  display: flex; flex-direction: column;
+  z-index: 200;
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-head {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; gap: 11px;
+}
+.sidebar-head-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: white; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+}
+.sidebar-head-brand h2 {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 700; color: var(--white); line-height: 1.2;
+}
+.sidebar-head-brand p { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+.sidebar-body { flex: 1; overflow-y: auto; padding: 10px 10px; }
+.nav-group { margin-bottom: 4px; }
+.nav-group-label {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: rgba(255,255,255,.28);
+  padding: 10px 8px 4px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: var(--r-sm);
+  cursor: pointer; transition: background .15s, color .15s;
+  color: rgba(255,255,255,.55); font-size: 13px; font-weight: 500;
+  user-select: none; position: relative;
+}
+.nav-link:hover { background: rgba(255,255,255,.07); color: var(--white); }
+.nav-link.active { background: #9DCF46; color: #1a2e04; font-weight: 700; }
+.nav-link-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px;
+  background: var(--red); color: var(--white);
+}
+.nav-badge.amber { background: var(--amber); }
+
+.sidebar-foot {
+  padding: 12px 14px; border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--white);
+}
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name {
+  font-family: var(--font-display); font-size: 12px; font-weight: 600;
+  color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sidebar-user-role { font-size: 10px; color: rgba(255,255,255,.35); }
+.sidebar-logout {
+  color: rgba(255,255,255,.3); cursor: pointer; font-size: 16px;
+  padding: 4px; border-radius: 6px; transition: color .15s, background .15s;
+}
+.sidebar-logout:hover { color: var(--white); background: rgba(255,255,255,.1); }
+
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--bottom-nav-h);
+  background: var(--g900);
+  z-index: 200;
+  align-items: stretch;
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  cursor: pointer; transition: background .15s;
+  color: rgba(255,255,255,.45); font-size: 10px; font-weight: 500;
+  position: relative;
+}
+.bottom-nav-item.active { color: #9DCF46; }
+.bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+.bottom-nav-item .bn-badge {
+  position: absolute; top: 6px; right: calc(50% - 18px);
+  min-width: 16px; height: 16px; border-radius: 8px;
+  background: var(--red); color: white; font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: fixed; top: 0; right: 0; left: var(--sidebar-w);
+  height: var(--topbar-h);
+  background: var(--white);
+  border-bottom: 1px solid var(--slate200);
+  display: flex; align-items: center; padding: 0 20px;
+  gap: 12px; z-index: 100;
+  transition: left .28s cubic-bezier(.4,0,.2,1);
+}
+.topbar-menu-btn {
+  display: none; width: 36px; height: 36px; border-radius: var(--r-sm);
+  background: var(--slate100); border: none; cursor: pointer;
+  align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 700; color: var(--slate900); flex: 1;
+}
+.topbar-date {
+  font-family: var(--font-mono); font-size: 11px; color: var(--slate400);
+  display: none;
+}
+.conn-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  user-select: none; transition: all .15s;
+}
+.conn-chip.online { background: var(--g100); color: var(--g600); }
+.conn-chip.offline { background: var(--amber-bg); color: #92400E; }
+.conn-chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+.conn-chip.online .conn-chip-dot { background: var(--g500); }
+.conn-chip.offline .conn-chip-dot { background: var(--amber); }
+
+/* topbar switch user button */
+.topbar-switch-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 10px 5px 6px; border-radius: 20px;
+  border: 1.5px solid var(--slate200); background: var(--slate100);
+  cursor: pointer; transition: all .15s; user-select: none;
+}
+.topbar-switch-btn:hover {
+  border-color: #9DCF46; background: var(--g100);
+  box-shadow: 0 2px 8px rgba(157,207,70,.2);
+}
+.topbar-switch-av {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: white;
+}
+.topbar-switch-name {
+  font-size: 12px; font-weight: 700; color: var(--slate700);
+  max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.topbar-switch-icon { font-size: 12px; color: var(--slate400); }
+
+/* ── MAIN ── */
+.main-wrap {
+  margin-left: var(--sidebar-w);
+  padding-top: var(--topbar-h);
+  min-height: 100dvh;
+  transition: margin-left .28s cubic-bezier(.4,0,.2,1);
+}
+.page-body { padding: 20px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* POS page overrides its own padding */
+.page#page-pos.active { display: flex; flex-direction: column; }
+
+/* ═══════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════ */
+
+/* ── Cards ── */
+.card {
+  background: var(--white); border-radius: var(--r-lg);
+  border: 1px solid var(--slate200); box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px 0;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 700; color: var(--slate900);
+}
+.card-link { font-size: 12px; font-weight: 600; color: var(--g500); cursor: pointer; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--r-sm);
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; transition: all .15s; white-space: nowrap;
+}
+.btn-primary { background: linear-gradient(135deg, #9DCF46 0%, #7bbf2e 100%); color: #1a2e04; font-weight: 700; }
+.btn-primary:hover { background: linear-gradient(135deg, #aedd55 0%, #9DCF46 100%); box-shadow: 0 4px 12px rgba(157,207,70,.35); }
+.btn-ghost { background: var(--slate100); color: var(--slate700); border: 1.5px solid var(--slate200); }
+.btn-ghost:hover { border-color: #52C3E3; color: #1E6F8F; background: #EEF9FD; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* ── Badges/chips ── */
+.chip {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+}
+.chip-green { background: var(--g100); color: var(--g700); }
+.chip-amber { background: var(--amber-bg); color: #92400E; }
+.chip-red { background: var(--red-bg); color: #B91C1C; }
+.chip-blue { background: var(--blue-bg); color: var(--blue-dark); }
+.chip-slate { background: var(--slate100); color: var(--slate600); }
+
+/* ═══════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--slate200);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .7px; color: var(--slate400); margin-bottom: 6px;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 800; line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-sub { font-size: 11px; color: var(--slate400); }
+.stat-card.s-green .stat-value { color: var(--g600); }
+.stat-card.s-amber .stat-value { color: var(--amber); }
+.stat-card.s-red .stat-value { color: var(--red); }
+.stat-card.s-blue .stat-value { color: var(--blue-dark); }
+
+.dash-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+
+.expiry-list { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+.expiry-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--r-sm);
+}
+.expiry-row.crit { background: var(--red-bg); }
+.expiry-row.warn { background: var(--amber-bg); }
+.expiry-name { flex: 1; font-size: 13px; font-weight: 500; }
+.expiry-days { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+.expiry-days.crit { color: var(--red); }
+.expiry-days.warn { color: var(--amber); }
+
+.tx-list { padding: 0 16px 14px; display: flex; flex-direction: column; }
+.tx-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--slate100);
+}
+.tx-row:last-child { border-bottom: none; }
+.tx-num { font-family: var(--font-mono); font-size: 11px; color: var(--slate400); width: 68px; flex-shrink: 0; }
+.tx-cashier { flex: 1; font-size: 13px; font-weight: 500; }
+.tx-count { font-size: 11px; color: var(--slate400); }
+.tx-amount { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--g600); }
+
+/* ═══════════════════════════════════════════
+   POS
+═══════════════════════════════════════════ */
+.pos-wrap {
+  display: flex; flex-direction: column;
+  height: calc(100dvh - var(--topbar-h));
+  overflow: hidden;
+}
+.pos-left {
+  flex: 1; overflow-y: auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.pos-right {
+  flex-shrink: 0; background: var(--white);
+  border-top: 1px solid var(--slate200);
+  display: flex; flex-direction: column;
+  max-height: 50vh;
+}
+
+/* search */
+.pos-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--white); border: 1.5px solid var(--slate200);
+  border-radius: var(--r); padding: 10px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.pos-search input {
+  flex: 1; border: none; outline: none;
+  font-family: var(--font-body); font-size: 14px; background: transparent;
+  color: var(--slate900);
+}
+.pos-search input::placeholder { color: var(--slate400); }
+
+/* category tabs */
+.cat-scroller {
+  display: flex; gap: 7px; overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.cat-scroller::-webkit-scrollbar { display: none; }
+.cat-pill {
+  flex-shrink: 0; padding: 6px 14px;
+  border-radius: 20px; border: 1.5px solid var(--slate200);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--white); color: var(--slate500);
+  transition: all .15s;
+}
+.cat-pill.active { background: var(--g600); color: var(--white); border-color: var(--g600); }
+
+/* product grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.prod-card {
+  background: var(--white); border: 1.5px solid var(--slate200);
+  border-radius: var(--r); padding: 14px 12px;
+  cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .1s;
+  position: relative; overflow: hidden;
+}
+.prod-card:hover { border-color: var(--g400); box-shadow: var(--shadow); transform: translateY(-1px); }
+.prod-card:active { transform: scale(.97); }
+.prod-card.oos { opacity: .5; cursor: not-allowed; }
+.prod-card-name {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 700; color: var(--slate900); margin-bottom: 2px; line-height: 1.3;
+}
+.prod-card-generic { font-size: 11px; color: var(--slate400); margin-bottom: 8px; }
+.prod-card-price {
+  font-family: var(--font-mono);
+  font-size: 16px; font-weight: 700; color: var(--g600);
+}
+.prod-card-stock { font-size: 10px; color: var(--slate400); margin-top: 2px; }
+.prod-exp-dot {
+  position: absolute; top: 9px; right: 9px;
+  width: 9px; height: 9px; border-radius: 50%;
+}
+.prod-exp-dot.warn { background: var(--amber); }
+.prod-exp-dot.crit { background: var(--red); box-shadow: 0 0 0 3px #FEF2F2; }
+
+/* order panel */
+.order-head {
+  padding: 12px 14px; border-bottom: 1px solid var(--slate100);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.order-head-title {
+  font-family: var(--font-display); font-size: 14px; font-weight: 700;
+}
+.order-cashier {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; padding: 5px 10px 5px 8px;
+  background: var(--g100); color: var(--g700); border-radius: 20px;
+  border: 1.5px solid var(--g200); cursor: pointer;
+  transition: all .15s; user-select: none;
+}
+.order-cashier:hover {
+  background: #9DCF46; color: #1a2e04;
+  border-color: #9DCF46; box-shadow: 0 2px 8px rgba(157,207,70,.3);
+}
+.order-cashier-av {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; color: white; flex-shrink: 0;
+}
+.order-cashier-name { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-cashier-switch { font-size: 10px; opacity: .6; }
+.cart-scroll { flex: 1; overflow-y: auto; padding: 10px 12px; min-height: 60px; }
+.cart-empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 80px; gap: 4px; color: var(--slate300);
+}
+.cart-empty-state span { font-size: 28px; }
+.cart-empty-state p { font-size: 11px; }
+.cart-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: var(--r-sm);
+  background: var(--slate100); margin-bottom: 6px;
+}
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-name {
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cart-item-batch { font-family: var(--font-mono); font-size: 9px; color: var(--slate400); margin-top: 1px; }
+.qty-ctrl { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.qty-btn {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--slate300); background: var(--white);
+  cursor: pointer; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--g600); transition: all .12s;
+}
+.qty-btn:hover { background: var(--g600); color: var(--white); border-color: var(--g600); }
+.qty-num { font-family: var(--font-mono); font-size: 13px; font-weight: 700; min-width: 18px; text-align: center; }
+.cart-item-price { font-family: var(--font-mono); font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.cart-item-del { color: var(--slate300); cursor: pointer; font-size: 13px; padding: 2px; flex-shrink: 0; }
+.cart-item-del:hover { color: var(--red); }
+
+.order-foot { padding: 10px 14px; border-top: 1px solid var(--slate100); flex-shrink: 0; }
+.order-total-row {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.order-total-label { font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--slate500); }
+.order-total-amount { font-family: var(--font-mono); font-size: 20px; font-weight: 800; color: var(--slate900); }
+.pay-methods { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+.pay-pill {
+  padding: 7px 4px; text-align: center; border-radius: var(--r-sm);
+  border: 2px solid var(--slate200); background: var(--slate100);
+  font-size: 11px; font-weight: 700; color: var(--slate500); cursor: pointer;
+  transition: all .15s;
+}
+.pay-pill.sel { border-color: var(--g600); background: var(--g100); color: var(--g700); }
+
+/* discount row */
+.discount-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+}
+.discount-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--slate400); flex-shrink: 0;
+}
+.disc-pills { display: flex; gap: 5px; flex: 1; }
+.disc-pill {
+  flex: 1; padding: 6px 4px; text-align: center; border-radius: var(--r-sm);
+  border: 2px solid var(--slate200); background: var(--slate100);
+  font-size: 11px; font-weight: 700; color: var(--slate500); cursor: pointer;
+  transition: all .15s;
+}
+.disc-pill.sel-none  { border-color: var(--slate400); background: var(--slate200); color: var(--slate700); }
+.disc-pill.sel-senior { border-color: var(--blue);  background: var(--blue-bg); color: var(--blue-dark); }
+.disc-pill.sel-pwd   { border-color: var(--amber); background: var(--amber-bg); color: #92400E; }
+
+/* order summary breakdown */
+.order-summary { margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px; }
+.order-summary-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--slate500); }
+.order-summary-row.disc-line { color: var(--blue-dark); font-weight: 600; }
+.order-summary-row.disc-line.pwd-line { color: #92400E; }
+.order-summary-row.total-line {
+  font-family: var(--font-display); font-size: 16px; font-weight: 800;
+  color: var(--slate900); padding-top: 6px;
+  border-top: 1.5px solid var(--slate200); margin-top: 2px;
+}
+
+.charge-btn {
+  width: 100%; padding: 14px; border: none; border-radius: var(--r);
+  background: linear-gradient(135deg, #9DCF46 0%, #7bbf2e 100%);
+  color: #1a2e04;
+  font-family: var(--font-display); font-size: 15px; font-weight: 800;
+  cursor: pointer; transition: all .15s;
+  box-shadow: 0 4px 14px rgba(157,207,70,.35);
+}
+.charge-btn:hover { background: linear-gradient(135deg, #aedd55 0%, #9DCF46 100%); box-shadow: 0 6px 18px rgba(157,207,70,.45); transform: translateY(-1px); }
+.charge-btn:disabled { background: var(--slate300); color: var(--slate500); cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* ═══════════════════════════════════════════
+   INVENTORY TABLE
+═══════════════════════════════════════════ */
+.toolbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+.toolbar .search-input {
+  flex: 1; min-width: 160px; padding: 9px 14px;
+  border: 1.5px solid var(--slate200); border-radius: var(--r-sm);
+  font-family: var(--font-body); font-size: 14px; outline: none; background: var(--white);
+  transition: border-color .15s;
+}
+.toolbar .search-input:focus { border-color: var(--g500); }
+
+.table-wrap { background: var(--white); border-radius: var(--r-lg); border: 1px solid var(--slate200); overflow: hidden; box-shadow: var(--shadow-sm); overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.data-table thead tr { background: var(--slate100); }
+.data-table th {
+  padding: 10px 14px; text-align: left;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .7px; color: var(--slate400);
+  border-bottom: 1.5px solid var(--slate200); white-space: nowrap;
+}
+.data-table td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--slate100); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--slate100); }
+.td-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; }
+.td-sub { font-size: 11px; color: var(--slate400); margin-top: 1px; }
+.td-mono { font-family: var(--font-mono); font-size: 12px; }
+.td-action { color: var(--g600); font-size: 12px; font-weight: 600; cursor: pointer; }
+
+/* ═══════════════════════════════════════════
+   EXPIRY MONITOR
+═══════════════════════════════════════════ */
+.filter-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+.filter-pill {
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 2px solid var(--slate200); background: var(--white); color: var(--slate500);
+  transition: all .15s;
+}
+.filter-pill.f-all { border-color: var(--g500); background: var(--g100); color: var(--g700); }
+.filter-pill.f-crit { border-color: var(--red); background: var(--red-bg); color: #B91C1C; }
+.filter-pill.f-warn { border-color: var(--amber); background: var(--amber-bg); color: #92400E; }
+.filter-pill.f-ok { border-color: var(--g400); background: var(--g100); color: var(--g700); }
+
+/* ═══════════════════════════════════════════
+   ATTENDANCE
+═══════════════════════════════════════════ */
+.emp-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+.emp-card {
+  background: var(--white); border-radius: var(--r-lg);
+  border: 1px solid var(--slate200); padding: 16px; box-shadow: var(--shadow-sm);
+}
+.emp-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.emp-av {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 14px; font-weight: 800;
+  color: var(--white); flex-shrink: 0;
+}
+.emp-av-info .emp-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+.emp-av-info .emp-role { font-size: 11px; color: var(--slate400); }
+.emp-status-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 12px; font-weight: 600; }
+.s-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.s-dot.in { background: var(--g400); }
+.s-dot.out { background: var(--slate300); }
+.s-dot.break { background: var(--amber); }
+.emp-time { font-family: var(--font-mono); font-size: 11px; color: var(--slate400); margin-bottom: 10px; }
+.emp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.emp-btn {
+  padding: 8px 6px; border: none; border-radius: var(--r-sm);
+  font-family: var(--font-body); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .15s; text-align: center;
+}
+.emp-btn.in { background: var(--g100); color: var(--g700); }
+.emp-btn.in:hover { background: var(--g600); color: var(--white); }
+.emp-btn.out { background: var(--red-bg); color: var(--red); }
+.emp-btn.out:hover { background: var(--red); color: var(--white); }
+.emp-btn.brk { background: var(--amber-bg); color: #92400E; }
+.emp-btn.ended { background: var(--slate100); color: var(--slate400); cursor: default; }
+.emp-btn.full { grid-column: 1 / -1; }
+
+/* ═══════════════════════════════════════════
+   REPORTS
+═══════════════════════════════════════════ */
+.sync-alert {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--amber-bg); border: 1px solid #FDE68A;
+  border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px;
+  font-size: 13px; color: #92400E;
+}
+.sync-alert-text { flex: 1; }
+.sync-now-btn {
+  padding: 6px 14px; border-radius: var(--r-sm);
+  background: var(--amber); color: var(--white);
+  border: none; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: var(--font-body); transition: background .15s;
+}
+.sync-now-btn:hover { background: #D97706; }
+.reports-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.report-card {
+  background: var(--white); border-radius: var(--r-lg);
+  border: 1px solid var(--slate200); padding: 18px; box-shadow: var(--shadow-sm);
+}
+.report-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.report-icon {
+  width: 42px; height: 42px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.ri-green { background: var(--g100); }
+.ri-blue { background: var(--blue-bg); }
+.ri-amber { background: var(--amber-bg); }
+.ri-red { background: var(--red-bg); }
+.report-card-info .r-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+.report-card-info .r-desc { font-size: 11px; color: var(--slate400); margin-top: 1px; }
+.report-stat-val {
+  font-family: var(--font-display); font-size: 26px; font-weight: 800;
+  color: var(--slate900); margin: 8px 0 2px;
+}
+.report-stat-lbl { font-size: 11px; color: var(--slate400); }
+.export-btn {
+  width: 100%; margin-top: 12px; padding: 9px;
+  background: var(--slate100); border: 1.5px solid var(--slate200); border-radius: var(--r-sm);
+  font-family: var(--font-body); font-size: 12px; font-weight: 700; color: var(--slate600);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all .15s;
+}
+.export-btn:hover { background: var(--g100); border-color: var(--g400); color: var(--g700); }
+
+/* ═══════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 800; display: none; align-items: flex-end; justify-content: center;
+  padding: 0;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--white); border-radius: var(--r-xl) var(--r-xl) 0 0;
+  width: 100%; max-width: 480px; padding: 24px 22px;
+  padding-bottom: calc(22px + env(safe-area-inset-bottom));
+  animation: slideUp .25s cubic-bezier(.4,0,.2,1);
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-handle {
+  width: 36px; height: 4px; background: var(--slate200); border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+.modal-sub { font-size: 13px; color: var(--slate400); margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.modal-actions .btn { flex: 1; padding: 12px; }
+
+/* product info block in modal */
+.modal-prod-block {
+  background: var(--slate100); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 14px;
+}
+.modal-prod-name { font-family: var(--font-display); font-size: 15px; font-weight: 800; }
+.modal-prod-sub { font-size: 12px; color: var(--slate400); margin-top: 2px; }
+
+/* batch list */
+.batch-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 6px; }
+.batch-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  border: 2px solid var(--slate200); border-radius: var(--r-sm);
+  cursor: pointer; transition: all .15s;
+}
+.batch-row:hover, .batch-row.sel { border-color: var(--g500); background: var(--g50); }
+.batch-info { flex: 1; }
+.batch-num { font-family: var(--font-mono); font-size: 10px; color: var(--slate400); }
+.batch-exp { font-size: 13px; font-weight: 700; }
+.batch-qty { font-size: 11px; color: var(--slate400); }
+.fefo-badge {
+  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  background: var(--g600); color: var(--white); padding: 3px 8px; border-radius: 20px;
+}
+
+/* receipt */
+.receipt-wrap { text-align: center; }
+.receipt-store-name {
+  font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--g700);
+}
+.receipt-store-sub { font-size: 11px; color: var(--slate400); margin-top: 2px; }
+.receipt-divider { border: none; border-top: 2px dashed var(--slate200); margin: 12px 0; }
+.receipt-items { text-align: left; display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.receipt-item-row { display: flex; justify-content: space-between; font-size: 12px; }
+.receipt-item-row .ri-name { color: var(--slate600); flex: 1; }
+.receipt-item-row .ri-price { font-family: var(--font-mono); font-weight: 700; }
+.receipt-total-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-display); font-size: 16px; font-weight: 800; margin-top: 4px;
+}
+.receipt-total-row span:last-child { font-family: var(--font-mono); color: var(--g600); }
+.receipt-change-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--slate400); margin-top: 3px; }
+.receipt-tx { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--slate700); margin-bottom: 2px; }
+.receipt-footer { font-size: 11px; color: var(--slate400); margin-top: 12px; line-height: 1.6; }
+
+/* cash tendered input */
+.cash-input-wrap {
+  background: var(--slate100); border-radius: var(--r); padding: 12px 16px; margin-bottom: 10px;
+}
+.cash-input-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--slate400); margin-bottom: 6px; }
+.cash-input {
+  width: 100%; border: none; background: transparent; outline: none;
+  font-family: var(--font-mono); font-size: 28px; font-weight: 800;
+  color: var(--slate900); text-align: center;
+}
+.change-display {
+  background: var(--g100); border-radius: var(--r-sm); padding: 12px;
+  text-align: center; margin-bottom: 6px;
+}
+.change-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--g600); margin-bottom: 2px; }
+.change-amount { font-family: var(--font-mono); font-size: 26px; font-weight: 800; color: var(--g700); }
+
+/* expiry warning modal */
+.warn-icon { font-size: 40px; text-align: center; display: block; margin-bottom: 8px; }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast-stack {
+  position: fixed; bottom: calc(var(--bottom-nav-h) + 12px); right: 16px; left: 16px;
+  display: flex; flex-direction: column; gap: 7px; z-index: 9999; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 14px; border-radius: var(--r);
+  font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg);
+  pointer-events: all; max-width: 360px; margin-left: auto;
+  animation: toastIn .22s ease;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.toast.t-success { background: var(--g700); color: var(--white); }
+.toast.t-warning { background: var(--amber); color: var(--slate900); }
+.toast.t-error { background: var(--red); color: var(--white); }
+.toast.t-info { background: var(--slate800); color: var(--white); }
+
+/* ═══════════════════════════════════════════
+   LOCK SCREEN
+═══════════════════════════════════════════ */
+#lock-screen {
+  position: fixed; inset: 0; z-index: 8000;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(157,207,70,.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(82,195,227,.22) 0%, transparent 50%),
+    linear-gradient(160deg, #0a1505 0%, #091418 60%, #071020 100%);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px;
+}
+#lock-screen.open { display: flex; }
+.lock-brand {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 32px;
+}
+.lock-brand-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: hidden;
+  box-shadow: 0 4px 14px rgba(82,195,227,.3);
+}
+.lock-brand-text h2 {
+  font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--white);
+}
+.lock-brand-text p { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+.lock-card {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--r-xl); width: 100%; max-width: 360px;
+  padding: 24px 20px; backdrop-filter: blur(8px);
+}
+.lock-heading {
+  font-family: var(--font-display); font-size: 12px; font-weight: 700;
+  color: #52C3E3; text-align: center; margin-bottom: 14px;
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+
+/* employee picker grid */
+.lock-emp-grid {
+  display: flex; flex-direction: column; gap: 7px; margin-bottom: 0;
+}
+.lock-emp-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--r);
+  background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.08);
+  cursor: pointer; transition: all .15s;
+}
+.lock-emp-btn:hover { background: rgba(82,195,227,.1); border-color: #52C3E3; box-shadow: 0 0 0 1px rgba(82,195,227,.3); }
+.lock-emp-av {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--white);
+}
+.lock-emp-info { flex: 1; }
+.lock-emp-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--white); }
+.lock-emp-role { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 1px; }
+.lock-emp-arrow { color: rgba(255,255,255,.25); font-size: 16px; }
+
+/* PIN entry state */
+.lock-pin-state { display: none; }
+.lock-pin-state.show { display: block; }
+.lock-emp-grid.hide { display: none; }
+
+.lock-back-btn {
+  display: flex; align-items: center; gap: 6px; background: none; border: none;
+  color: rgba(255,255,255,.4); font-size: 12px; font-weight: 600; cursor: pointer;
+  padding: 0; margin-bottom: 16px; font-family: var(--font-body);
+  transition: color .15s;
+}
+.lock-back-btn:hover { color: rgba(255,255,255,.8); }
+
+.lock-selected-emp {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  padding: 10px 12px; background: rgba(255,255,255,.06); border-radius: var(--r);
+}
+.lock-selected-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--white); }
+.lock-selected-role { font-size: 11px; color: rgba(255,255,255,.35); }
+
+/* PIN dots */
+.lock-pin-dots {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
+}
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.3); background: transparent;
+  transition: all .15s;
+}
+.pin-dot.filled { background: #9DCF46; border-color: #9DCF46; box-shadow: 0 0 8px rgba(157,207,70,.6); }
+
+/* PIN numpad */
+.pin-pad {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+}
+.pin-key {
+  padding: 14px 8px; border-radius: var(--r); border: none;
+  background: rgba(255,255,255,.07); color: var(--white);
+  font-family: var(--font-display); font-size: 18px; font-weight: 700;
+  cursor: pointer; transition: all .15s; text-align: center;
+}
+.pin-key:hover { background: rgba(157,207,70,.2); color: #9DCF46; }
+.pin-key:active { transform: scale(.94); background: #9DCF46; color: #1a2e04; }
+.pin-key.del { font-size: 16px; background: rgba(255,255,255,.04); color: rgba(255,255,255,.5); }
+.pin-key.del:hover { background: rgba(239,68,68,.2); color: var(--red); }
+.pin-key.empty { background: transparent; cursor: default; pointer-events: none; }
+
+.lock-error {
+  text-align: center; font-size: 12px; color: var(--red);
+  margin-top: 10px; font-weight: 600; min-height: 18px;
+}
+.lock-footer {
+  margin-top: 20px; text-align: center; font-size: 11px; color: rgba(255,255,255,.2);
+}
+
+/* ═══════════════════════════════════════════
+   TRANSACTION LOG PAGE
+═══════════════════════════════════════════ */
+.txlog-toolbar {
+  display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center;
+}
+.txlog-filter-select {
+  padding: 8px 12px; border: 1.5px solid var(--slate200); border-radius: var(--r-sm);
+  font-family: var(--font-body); font-size: 13px; outline: none; background: var(--white);
+  color: var(--slate900); min-width: 160px;
+}
+.txlog-filter-select:focus { border-color: var(--g500); }
+
+.emp-summary-grid {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 16px;
+}
+.emp-summary-card {
+  background: var(--white); border-radius: var(--r); border: 1px solid var(--slate200);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.emp-summary-av {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 13px; font-weight: 800; color: var(--white);
+}
+.emp-summary-info { flex: 1; min-width: 0; }
+.emp-summary-name { font-family: var(--font-display); font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.emp-summary-stats { font-size: 11px; color: var(--slate400); margin-top: 2px; }
+.emp-summary-total { font-family: var(--font-mono); font-size: 14px; font-weight: 800; color: var(--g600); flex-shrink: 0; }
+
+.txlog-expand-row {
+  background: var(--g50); border-bottom: 1px solid var(--g100);
+}
+.txlog-expand-row td { padding: 8px 14px 10px 36px; }
+.txlog-items-list { font-size: 12px; color: var(--slate500); display: flex; flex-direction: column; gap: 3px; }
+.txlog-item-line { display: flex; justify-content: space-between; }
+.tx-row-clickable { cursor: pointer; }
+.tx-row-clickable:hover td { background: var(--slate100) !important; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (min-width: 600px) {
+  .stats-row { grid-template-columns: repeat(4, 1fr); }
+  .dash-grid { grid-template-columns: 1fr 1fr; }
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .emp-grid { grid-template-columns: repeat(2, 1fr); }
+  .reports-grid { grid-template-columns: repeat(2, 1fr); }
+  .toast-stack { left: auto; }
+  .overlay { align-items: center; padding: 20px; }
+  .modal { border-radius: var(--r-xl); max-width: 460px; }
+}
+
+@media (min-width: 900px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+  .emp-grid { grid-template-columns: repeat(3, 1fr); }
+  .topbar-date { display: block; }
+
+  /* POS side-by-side on desktop */
+  .pos-wrap { flex-direction: row; }
+  .pos-left { padding: 16px; }
+  .pos-right {
+    width: 320px; flex-shrink: 0; border-top: none;
+    border-left: 1px solid var(--slate200);
+    max-height: none; height: 100%;
+  }
+}
+
+/* MOBILE: hide sidebar, show bottom nav */
+@media (max-width: 767px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .topbar { left: 0; }
+  .topbar-menu-btn { display: flex; }
+  .main-wrap { margin-left: 0; padding-bottom: var(--bottom-nav-h); }
+  .bottom-nav { display: flex; }
+  .toast-stack { bottom: calc(var(--bottom-nav-h) + 10px); }
+}
+
+/* DESKTOP: always show sidebar */
+@media (min-width: 768px) {
+  .sidebar { transform: none !important; }
+  .topbar { left: var(--sidebar-w); }
+  .main-wrap { margin-left: var(--sidebar-w); padding-bottom: 0; }
+  .bottom-nav { display: none !important; }
+  .topbar-menu-btn { display: none !important; }
+}
+
+/* Sidebar overlay on mobile */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 190;
+}
+.sidebar-overlay.open { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ─── LOGIN ─────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-mark">
+      <div class="login-mark-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="54" height="54"><circle cx="50" cy="52" r="46" fill="none" stroke="#A8D5E2" stroke-width="2.5"/><ellipse cx="50" cy="68" rx="30" ry="8" fill="#6BB8D4"/><path d="M22 62 Q50 86 78 62 L74 74 Q50 91 26 74 Z" fill="#5AAEC8"/><path d="M28 65 Q50 78 72 65" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4"/><ellipse cx="50" cy="62" rx="30" ry="5" fill="none" stroke="#6DBF3E" stroke-width="3"/><rect x="22" y="38" width="8" height="26" rx="4" fill="#5AAEC8" transform="rotate(-20 26 51)"/><ellipse cx="19" cy="57" rx="5" ry="7" fill="#6BB8D4" transform="rotate(-20 19 57)"/><path d="M44 60 Q36 42 42 30 Q50 40 44 60Z" fill="#6DBF3E"/><line x1="43" y1="57" x2="41" y2="32" stroke="#5aad30" stroke-width="0.8"/><path d="M50 58 Q46 38 52 26 Q58 38 50 58Z" fill="#8DD44A"/><line x1="50" y1="56" x2="51" y2="28" stroke="#6DBF3E" stroke-width="0.8"/><path d="M56 60 Q62 42 58 30 Q50 40 56 60Z" fill="#6DBF3E"/><line x1="57" y1="58" x2="59" y2="32" stroke="#5aad30" stroke-width="0.8"/><rect x="53" y="17" width="10" height="19" rx="5" fill="#52C3E3" transform="rotate(35 58 26)"/><rect x="53" y="26" width="10" height="19" rx="5" fill="#E05555" transform="rotate(35 58 26)"/><line x1="49" y1="23" x2="64" y2="30" stroke="white" stroke-width="1" opacity="0.6"/><circle cx="43" cy="25" r="1.8" fill="#52C3E3"/><circle cx="39" cy="30" r="1.4" fill="#52C3E3"/><circle cx="45" cy="33" r="1.1" fill="#52C3E3"/><circle cx="41" cy="37" r="0.9" fill="#52C3E3" opacity="0.7"/><circle cx="46" cy="39" r="0.8" fill="#52C3E3" opacity="0.6"/></svg></div>
+      <div class="login-mark-text">
+        <h1>Cabido Pharmacy</h1>
+        <p>POS &amp; Inventory System · San Marcelino</p>
+      </div>
+    </div>
+    <div class="login-field">
+      <label>Employee</label>
+      <select id="l-user">
+        <option value="">— Select —</option>
+        <option value="admin">Maria Santos · Admin</option>
+        <option value="cashier">Ana Reyes · Cashier</option>
+        <option value="pharmacist">Rodel Cruz · Pharmacist</option>
+        <option value="manager">Josie Bautista · Manager</option>
+      </select>
+    </div>
+    <div class="login-field">
+      <label>PIN</label>
+      <input type="password" id="l-pin" placeholder="Enter any 4 digits" maxlength="4" inputmode="numeric">
+    </div>
+    <button class="login-submit" onclick="doLogin()">Log In &amp; Start Shift</button>
+    <p class="login-hint">Any 4-digit PIN works in demo mode</p>
+  </div>
+</div>
+
+<!-- ─── LOCK SCREEN ───────────────────────── -->
+<div id="lock-screen">
+  <div class="lock-brand">
+    <div class="lock-brand-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="44" height="44"><circle cx="50" cy="52" r="46" fill="none" stroke="#A8D5E2" stroke-width="2.5"/><ellipse cx="50" cy="68" rx="30" ry="8" fill="#6BB8D4"/><path d="M22 62 Q50 86 78 62 L74 74 Q50 91 26 74 Z" fill="#5AAEC8"/><path d="M28 65 Q50 78 72 65" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4"/><ellipse cx="50" cy="62" rx="30" ry="5" fill="none" stroke="#6DBF3E" stroke-width="3"/><rect x="22" y="38" width="8" height="26" rx="4" fill="#5AAEC8" transform="rotate(-20 26 51)"/><ellipse cx="19" cy="57" rx="5" ry="7" fill="#6BB8D4" transform="rotate(-20 19 57)"/><path d="M44 60 Q36 42 42 30 Q50 40 44 60Z" fill="#6DBF3E"/><line x1="43" y1="57" x2="41" y2="32" stroke="#5aad30" stroke-width="0.8"/><path d="M50 58 Q46 38 52 26 Q58 38 50 58Z" fill="#8DD44A"/><line x1="50" y1="56" x2="51" y2="28" stroke="#6DBF3E" stroke-width="0.8"/><path d="M56 60 Q62 42 58 30 Q50 40 56 60Z" fill="#6DBF3E"/><line x1="57" y1="58" x2="59" y2="32" stroke="#5aad30" stroke-width="0.8"/><rect x="53" y="17" width="10" height="19" rx="5" fill="#52C3E3" transform="rotate(35 58 26)"/><rect x="53" y="26" width="10" height="19" rx="5" fill="#E05555" transform="rotate(35 58 26)"/><line x1="49" y1="23" x2="64" y2="30" stroke="white" stroke-width="1" opacity="0.6"/><circle cx="43" cy="25" r="1.8" fill="#52C3E3"/><circle cx="39" cy="30" r="1.4" fill="#52C3E3"/><circle cx="45" cy="33" r="1.1" fill="#52C3E3"/><circle cx="41" cy="37" r="0.9" fill="#52C3E3" opacity="0.7"/><circle cx="46" cy="39" r="0.8" fill="#52C3E3" opacity="0.6"/></svg></div>
+    <div class="lock-brand-text"><h2>Cabido RX</h2><p>Tap your name to continue</p></div>
+  </div>
+  <div class="lock-card">
+    <div class="lock-heading" id="lock-heading">Who's selling?</div>
+
+    <!-- Step 1: Employee picker -->
+    <div class="lock-emp-grid" id="lock-emp-grid"></div>
+
+    <!-- Step 2: PIN entry -->
+    <div class="lock-pin-state" id="lock-pin-state">
+      <button class="lock-back-btn" onclick="lockGoBack()">← Back</button>
+      <div class="lock-selected-emp" id="lock-sel-emp">
+        <div class="lock-emp-av" id="lock-sel-av" style="background:var(--g600)">AR</div>
+        <div>
+          <div class="lock-selected-name" id="lock-sel-name">Ana Reyes</div>
+          <div class="lock-selected-role" id="lock-sel-role">Cashier</div>
+        </div>
+      </div>
+      <div class="lock-pin-dots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinKey('1')">1</button>
+        <button class="pin-key" onclick="pinKey('2')">2</button>
+        <button class="pin-key" onclick="pinKey('3')">3</button>
+        <button class="pin-key" onclick="pinKey('4')">4</button>
+        <button class="pin-key" onclick="pinKey('5')">5</button>
+        <button class="pin-key" onclick="pinKey('6')">6</button>
+        <button class="pin-key" onclick="pinKey('7')">7</button>
+        <button class="pin-key" onclick="pinKey('8')">8</button>
+        <button class="pin-key" onclick="pinKey('9')">9</button>
+        <button class="pin-key empty"></button>
+        <button class="pin-key" onclick="pinKey('0')">0</button>
+        <button class="pin-key del" onclick="pinDel()">⌫</button>
+      </div>
+      <div class="lock-error" id="lock-error"></div>
+    </div>
+  </div>
+  <div class="lock-footer">Session locks automatically after each sale</div>
+</div>
+<div id="app">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-head-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="34" height="34"><circle cx="50" cy="52" r="46" fill="none" stroke="#A8D5E2" stroke-width="2.5"/><ellipse cx="50" cy="68" rx="30" ry="8" fill="#6BB8D4"/><path d="M22 62 Q50 86 78 62 L74 74 Q50 91 26 74 Z" fill="#5AAEC8"/><path d="M28 65 Q50 78 72 65" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.4"/><ellipse cx="50" cy="62" rx="30" ry="5" fill="none" stroke="#6DBF3E" stroke-width="3"/><rect x="22" y="38" width="8" height="26" rx="4" fill="#5AAEC8" transform="rotate(-20 26 51)"/><ellipse cx="19" cy="57" rx="5" ry="7" fill="#6BB8D4" transform="rotate(-20 19 57)"/><path d="M44 60 Q36 42 42 30 Q50 40 44 60Z" fill="#6DBF3E"/><path d="M50 58 Q46 38 52 26 Q58 38 50 58Z" fill="#8DD44A"/><path d="M56 60 Q62 42 58 30 Q50 40 56 60Z" fill="#6DBF3E"/><rect x="53" y="17" width="10" height="19" rx="5" fill="#52C3E3" transform="rotate(35 58 26)"/><rect x="53" y="26" width="10" height="19" rx="5" fill="#E05555" transform="rotate(35 58 26)"/><circle cx="43" cy="25" r="1.8" fill="#52C3E3"/><circle cx="39" cy="30" r="1.4" fill="#52C3E3"/><circle cx="45" cy="33" r="1.1" fill="#52C3E3"/></svg></div>
+      <div class="sidebar-head-brand"><h2>Cabido RX</h2><p>San Marcelino, Zambales</p></div>
+    </div>
+    <div class="sidebar-body">
+      <div class="nav-group">
+        <div class="nav-group-label">Operations</div>
+        <div class="nav-link active" data-page="dashboard" onclick="nav('dashboard',this)">
+          <span class="nav-link-icon">📊</span> Dashboard
+        </div>
+        <div class="nav-link" data-page="pos" onclick="nav('pos',this)">
+          <span class="nav-link-icon">🛒</span> Point of Sale
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Inventory</div>
+        <div class="nav-link" data-page="inventory" onclick="nav('inventory',this)">
+          <span class="nav-link-icon">📦</span> Products &amp; Stock
+        </div>
+        <div class="nav-link" data-page="expiry" onclick="nav('expiry',this)">
+          <span class="nav-link-icon">⏰</span> Expiry Monitor
+          <span class="nav-badge" id="expiry-cnt">3</span>
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">People</div>
+        <div class="nav-link" data-page="attendance" onclick="nav('attendance',this)">
+          <span class="nav-link-icon">👥</span> Employees
+        </div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Reports</div>
+        <div class="nav-link" data-page="txlog" onclick="nav('txlog',this)">
+          <span class="nav-link-icon">🧾</span> Transaction Log
+        </div>
+        <div class="nav-link" data-page="reports" onclick="nav('reports',this)">
+          <span class="nav-link-icon">📈</span> Reports &amp; Export
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-foot">
+      <div class="sidebar-avatar" id="sb-av" style="background:var(--g600)">AR</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sb-name">Ana Reyes</div>
+        <div class="sidebar-user-role" id="sb-role">Cashier</div>
+      </div>
+      <div class="sidebar-logout" onclick="showLock()" title="Lock screen">🔒</div>
+      <div class="sidebar-logout" onclick="doLogout()" title="Log out" style="margin-left:2px">⏻</div>
+    </div>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-date" id="topbar-date"></div>
+    <div class="topbar-switch-btn" id="topbar-switch-btn" onclick="showLock()" title="Switch cashier">
+      <div class="topbar-switch-av" id="topbar-switch-av" style="background:#2196A8">AR</div>
+      <span class="topbar-switch-name" id="topbar-switch-name">Ana Reyes</span>
+      <span class="topbar-switch-icon">⇄</span>
+    </div>
+    <div class="conn-chip online" id="conn-chip" onclick="toggleOffline()">
+      <div class="conn-chip-dot"></div> Online
+    </div>
+  </header>
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-item active" data-page="dashboard" onclick="nav('dashboard',this)">
+      <span class="bn-icon">📊</span><span>Home</span>
+    </div>
+    <div class="bottom-nav-item" data-page="pos" onclick="nav('pos',this)">
+      <span class="bn-icon">🛒</span><span>POS</span>
+    </div>
+    <div class="bottom-nav-item" data-page="inventory" onclick="nav('inventory',this)">
+      <span class="bn-icon">📦</span><span>Stock</span>
+    </div>
+    <div class="bottom-nav-item" data-page="expiry" onclick="nav('expiry',this)">
+      <span class="bn-icon">⏰</span><span>Expiry</span>
+      <span class="bn-badge" id="bn-expiry-cnt">3</span>
+    </div>
+    <div class="bottom-nav-item" data-page="reports" onclick="nav('reports',this)">
+      <span class="bn-icon">📈</span><span>Reports</span>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active page-body" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card s-green">
+          <div class="stat-label">Today's Sales</div>
+          <div class="stat-value" id="d-sales">₱4,820</div>
+          <div class="stat-sub">23 transactions</div>
+        </div>
+        <div class="stat-card s-blue">
+          <div class="stat-label">Items Sold</div>
+          <div class="stat-value">68</div>
+          <div class="stat-sub">14 products</div>
+        </div>
+        <div class="stat-card s-amber">
+          <div class="stat-label">Low Stock</div>
+          <div class="stat-value">5</div>
+          <div class="stat-sub">need reorder</div>
+        </div>
+        <div class="stat-card s-red">
+          <div class="stat-label">Expiring Soon</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">within 30 days</div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-header" style="padding-bottom:10px">
+            <div class="card-title">⏰ Expiry Alerts</div>
+            <div class="card-link" onclick="nav('expiry')">View all →</div>
+          </div>
+          <div class="expiry-list">
+            <div class="expiry-row crit">
+              <span class="chip chip-red">12d</span>
+              <span class="expiry-name">Amoxicillin 500mg · B-024</span>
+              <span class="expiry-days crit">Jul 7</span>
+            </div>
+            <div class="expiry-row warn">
+              <span class="chip chip-amber">24d</span>
+              <span class="expiry-name">Mefenamic Acid · B-019</span>
+              <span class="expiry-days warn">Jul 19</span>
+            </div>
+            <div class="expiry-row warn">
+              <span class="chip chip-amber">29d</span>
+              <span class="expiry-name">Cetirizine 10mg · B-031</span>
+              <span class="expiry-days warn">Jul 24</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header" style="padding-bottom:0">
+            <div class="card-title">🧾 Recent Transactions</div>
+            <div class="card-link" onclick="nav('reports')">All →</div>
+          </div>
+          <div class="tx-list" id="tx-list">
+            <div class="tx-row"><span class="tx-num">#TX-0023</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">3 items</span><span class="tx-amount">₱285</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0022</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">1 item</span><span class="tx-amount">₱48</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0021</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">5 items</span><span class="tx-amount">₱620</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0020</span><span class="tx-cashier">Rodel Cruz</span><span class="tx-count">2 items</span><span class="tx-amount">₱192</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── POS ── -->
+    <div class="page" id="page-pos">
+      <div class="pos-wrap">
+        <div class="pos-left">
+          <div class="pos-search">
+            <span style="color:var(--slate400);font-size:16px">🔍</span>
+            <input type="search" id="pos-q" placeholder="Search or scan barcode…" oninput="filterProds()" autocomplete="off">
+          </div>
+          <div class="cat-scroller" id="cat-scroller"></div>
+          <div class="product-grid" id="prod-grid"></div>
+        </div>
+        <div class="pos-right">
+          <div class="order-head">
+            <div class="order-head-title">Current Order</div>
+            <div class="order-cashier" id="pos-cashier" onclick="showLock()" title="Tap to switch cashier">
+              <div class="order-cashier-av" id="pos-cashier-av" style="background:#2196A8">AR</div>
+              <span class="order-cashier-name" id="pos-cashier-name">Ana Reyes</span>
+              <span class="order-cashier-switch">⇄</span>
+            </div>
+          </div>
+          <div class="cart-scroll" id="cart-scroll">
+            <div class="cart-empty-state"><span>🛒</span><p>No items yet</p></div>
+          </div>
+          <div class="order-foot" id="order-foot" style="display:none">
+            <!-- Discount selector -->
+            <div class="discount-row">
+              <span class="discount-label">Discount</span>
+              <div class="disc-pills">
+                <div class="disc-pill sel-none" id="dp-none"   onclick="selDisc('none')">None</div>
+                <div class="disc-pill"          id="dp-senior" onclick="selDisc('senior')">👴 Senior</div>
+                <div class="disc-pill"          id="dp-pwd"    onclick="selDisc('pwd')">♿ PWD</div>
+              </div>
+            </div>
+            <!-- Summary breakdown -->
+            <div class="order-summary" id="order-summary">
+              <div class="order-summary-row"><span>Subtotal</span><span id="sum-subtotal">₱0.00</span></div>
+              <div class="order-summary-row disc-line" id="sum-disc-row" style="display:none">
+                <span id="sum-disc-label">Senior Discount (20%)</span>
+                <span id="sum-disc-amt">−₱0.00</span>
+              </div>
+              <div class="order-summary-row total-line"><span>Total</span><span id="order-total">₱0.00</span></div>
+            </div>
+            <!-- Payment methods -->
+            <div class="pay-methods">
+              <div class="pay-pill sel" id="pm-cash"  onclick="selPay('cash')">💵 Cash</div>
+              <div class="pay-pill"    id="pm-gcash" onclick="selPay('gcash')">📱 GCash</div>
+              <div class="pay-pill"    id="pm-maya"  onclick="selPay('maya')">💳 Maya</div>
+            </div>
+            <button class="charge-btn" id="charge-btn" onclick="openPayModal()">Charge ₱0.00</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INVENTORY ── -->
+    <div class="page page-body" id="page-inventory">
+      <div class="toolbar">
+        <input type="search" class="search-input" placeholder="🔍 Search products…" oninput="filterInv(event)">
+        <button class="btn btn-ghost btn-sm" onclick="toast('Excel import dialog','info')">📥 Import</button>
+        <button class="btn btn-primary btn-sm" onclick="toast('Add product form','success')">+ Add</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Stock</th>
+              <th>Batches</th>
+              <th>Nearest Expiry</th>
+              <th>Price</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── EXPIRY ── -->
+    <div class="page page-body" id="page-expiry">
+      <div class="filter-pills">
+        <div class="filter-pill f-all" onclick="setExpiryFilter('all',this)">All</div>
+        <div class="filter-pill" onclick="setExpiryFilter('crit',this)">🔴 Critical ≤30d</div>
+        <div class="filter-pill" onclick="setExpiryFilter('warn',this)">🟡 Warning ≤60d</div>
+        <div class="filter-pill" onclick="setExpiryFilter('ok',this)">🟢 OK</div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Product</th><th>Batch</th><th>Expiry</th><th>Days</th><th>Qty</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="exp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── ATTENDANCE ── -->
+    <div class="page page-body" id="page-attendance">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:13px;color:var(--slate500)">Shift: <strong id="att-date-lbl"></strong></div>
+        <button class="btn btn-ghost btn-sm" onclick="toast('Employee report exported to Excel','success')">📥 Export</button>
+      </div>
+      <div class="emp-grid" id="emp-grid"></div>
+      <div class="card" style="overflow:hidden">
+        <div class="card-header" style="padding-bottom:10px"><div class="card-title">📋 Shift Log Today</div></div>
+        <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Role</th><th>Time In</th><th>Break</th><th>Time Out</th><th>Hours</th></tr></thead>
+            <tbody id="shift-log-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPORTS ── -->
+    <div class="page page-body" id="page-reports">
+      <div class="sync-alert" id="sync-alert" style="display:none">
+        <span style="font-size:20px">⚠️</span>
+        <div class="sync-alert-text"><strong id="sync-count">3</strong> offline transactions pending sync.</div>
+        <button class="sync-now-btn" onclick="doSync()">Sync Now</button>
+      </div>
+      <div class="reports-grid">
+        <div class="report-card">
+          <div class="report-card-head"><div class="report-icon ri-green">📊</div><div class="report-card-info"><div class="r-title">Daily Sales</div><div class="r-desc">All transactions today</div></div></div>
+          <div class="report-stat-val" id="r-sales">₱4,820</div>
+          <div class="report-stat-lbl">23 transactions · avg ₱209</div>
+          <button class="export-btn" onclick="toast('Sales exported to Excel','success')">📥 Export to Excel</button>
+        </div>
+        <div class="report-card">
+          <div class="report-card-head"><div class="report-icon ri-blue">📦</div><div class="report-card-info"><div class="r-title">Inventory</div><div class="r-desc">Current stock levels</div></div></div>
+          <div class="report-stat-val">42</div>
+          <div class="report-stat-lbl">Products · 5 low stock</div>
+          <button class="export-btn" onclick="toast('Inventory exported','success')">📥 Export to Excel</button>
+        </div>
+        <div class="report-card">
+          <div class="report-card-head"><div class="report-icon ri-amber">👤</div><div class="report-card-info"><div class="r-title">Employee Sales</div><div class="r-desc">Performance per cashier</div></div></div>
+          <div class="report-stat-val">Ana R.</div>
+          <div class="report-stat-lbl">Top cashier · 18 transactions</div>
+          <button class="export-btn" onclick="toast('Employee report exported','success')">📥 Export to Excel</button>
+        </div>
+        <div class="report-card">
+          <div class="report-card-head"><div class="report-icon ri-red">⏰</div><div class="report-card-info"><div class="r-title">Expiration</div><div class="r-desc">Batches expiring in 90d</div></div></div>
+          <div class="report-stat-val">8</div>
+          <div class="report-stat-lbl">3 critical · ₱12,400 at risk</div>
+          <button class="export-btn" onclick="toast('Expiration report exported','success')">📥 Export to Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TRANSACTION LOG ── -->
+    <div class="page page-body" id="page-txlog">
+      <!-- Employee summary cards -->
+      <div class="emp-summary-grid" id="txlog-emp-summary"></div>
+      <!-- Toolbar -->
+      <div class="txlog-toolbar">
+        <select class="txlog-filter-select" id="txlog-emp-filter" onchange="renderTxLog()">
+          <option value="all">All Employees</option>
+        </select>
+        <select class="txlog-filter-select" id="txlog-pay-filter" onchange="renderTxLog()">
+          <option value="all">All Payment Methods</option>
+          <option value="cash">Cash</option>
+          <option value="gcash">GCash</option>
+          <option value="maya">Maya</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="toast('Transaction log exported to Excel','success')">📥 Export</button>
+      </div>
+      <!-- Log table -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>TX #</th>
+              <th>Employee</th>
+              <th>Time</th>
+              <th>Items</th>
+              <th>Discount</th>
+              <th>Payment</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="txlog-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+<!-- ─── MODALS ─────────────────────────────── -->
+
+<!-- Expiry warning -->
+<div class="overlay" id="ov-expwarn">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <span class="warn-icon">⚠️</span>
+    <div class="modal-title">Near-Expiry Product</div>
+    <div class="modal-sub" id="expwarn-text">Batch expires in 24 days. Continue?</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="expWarnClose(false)">Remove</button>
+      <button class="btn btn-primary" onclick="expWarnClose(true)">Continue Sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cash payment -->
+<div class="overlay" id="ov-pay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="pay-title">💵 Cash Payment</div>
+    <div class="modal-sub" id="pay-sub">Total: ₱0.00</div>
+    <div class="cash-input-wrap">
+      <div class="cash-input-label">Amount Tendered</div>
+      <input class="cash-input" id="cash-in" type="number" placeholder="0.00" inputmode="decimal" oninput="calcChange()">
+    </div>
+    <div class="change-display">
+      <div class="change-label">Change</div>
+      <div class="change-amount" id="change-amt">₱0.00</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeOverlay('ov-pay')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPay()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt -->
+<div class="overlay" id="ov-receipt">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="receipt-wrap">
+      <div class="receipt-store-name">CABIDO PHARMACY</div>
+      <div class="receipt-store-sub">Public Market, San Marcelino, Zambales · 0992 553 4270</div>
+      <hr class="receipt-divider">
+      <div id="receipt-body"></div>
+      <hr class="receipt-divider">
+      <div class="receipt-footer">"Gamot na kalidad sa presyong abot kaya"<br>Thank you for your purchase!</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="resetOrder()">New Order</button>
+      <button class="btn btn-primary" onclick="toast('Printing receipt…','success');resetOrder()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast stack -->
+<div class="toast-stack" id="toast-stack"></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ── DATA ────────────────────────────────── */
+const PRODUCTS = [
+  { id:1, name:'Amoxicillin 500mg', generic:'Amoxicillin', cat:'Antibiotics', price:12, unit:'tab',
+    batches:[{id:'B-024',exp:'2026-07-07',qty:48},{id:'B-031',exp:'2026-10-15',qty:120}] },
+  { id:2, name:'Mefenamic Acid 500mg', generic:'Mefenamic Acid', cat:'Analgesics', price:8.50, unit:'cap',
+    batches:[{id:'B-019',exp:'2026-07-19',qty:72},{id:'B-027',exp:'2026-12-01',qty:200}] },
+  { id:3, name:'Cetirizine 10mg', generic:'Cetirizine HCl', cat:'Antihistamines', price:9, unit:'tab',
+    batches:[{id:'B-031',exp:'2026-07-24',qty:60},{id:'B-040',exp:'2027-01-10',qty:150}] },
+  { id:4, name:'Paracetamol 500mg', generic:'Paracetamol', cat:'Analgesics', price:4, unit:'tab',
+    batches:[{id:'B-041',exp:'2027-03-20',qty:500}] },
+  { id:5, name:'Losartan 50mg', generic:'Losartan Potassium', cat:'Maintenance', price:18, unit:'tab',
+    batches:[{id:'B-037',exp:'2027-02-10',qty:90}] },
+  { id:6, name:'Metformin 500mg', generic:'Metformin HCl', cat:'Maintenance', price:7, unit:'tab',
+    batches:[{id:'B-038',exp:'2027-05-01',qty:180}] },
+  { id:7, name:'Amlodipine 5mg', generic:'Amlodipine Besylate', cat:'Maintenance', price:15, unit:'tab',
+    batches:[{id:'B-033',exp:'2026-09-30',qty:5}] },
+  { id:8, name:'Ascorbic Acid 500mg', generic:'Vitamin C', cat:'Vitamins', price:5, unit:'tab',
+    batches:[{id:'B-042',exp:'2027-06-15',qty:300}] },
+  { id:9, name:'Biogesic 500mg', generic:'Paracetamol', cat:'Analgesics', price:6.50, unit:'tab',
+    batches:[{id:'B-043',exp:'2027-04-10',qty:240}] },
+  { id:10, name:'Cloxacillin 500mg', generic:'Cloxacillin Na', cat:'Antibiotics', price:22, unit:'cap',
+    batches:[{id:'B-030',exp:'2026-11-20',qty:0}] },
+  { id:11, name:'Omeprazole 20mg', generic:'Omeprazole', cat:'GI', price:14, unit:'cap',
+    batches:[{id:'B-044',exp:'2027-02-28',qty:80}] },
+  { id:12, name:'Salbutamol 2mg', generic:'Salbutamol Sulfate', cat:'Respiratory', price:3.50, unit:'tab',
+    batches:[{id:'B-039',exp:'2026-10-05',qty:12}] },
+];
+
+const EMPLOYEES = [
+  { id:'E1', name:'Maria Santos', role:'Admin', initials:'MS', color:'#2E7D4F', timeIn:'08:02', timeOut:null, onBreak:false },
+  { id:'E2', name:'Ana Reyes', role:'Cashier', initials:'AR', color:'#2196A8', timeIn:'08:00', timeOut:null, onBreak:false },
+  { id:'E3', name:'Rodel Cruz', role:'Pharmacist', initials:'RC', color:'#9333EA', timeIn:'08:15', timeOut:null, onBreak:false },
+  { id:'E4', name:'Josie Bautista', role:'Manager', initials:'JB', color:'#F59E0B', timeIn:null, timeOut:null, onBreak:false },
+  { id:'E5', name:'Ben Tolentino', role:'Inventory', initials:'BT', color:'#DC3545', timeIn:'09:00', timeOut:null, onBreak:true },
+  { id:'E6', name:'Lea Dimaculangan', role:'Cashier', initials:'LD', color:'#607D8B', timeIn:'07:55', timeOut:'12:00', onBreak:false },
+];
+
+/* ── STATE ───────────────────────────────── */
+let currentUser = { name:'Ana Reyes', role:'Cashier', initials:'AR', color:'#2196A8' };
+let cart = [];
+let payMethod = 'cash';
+let discType = 'none';
+let txCounter = 24;
+let totalSales = 4820;
+let offline = false;
+let pendingSync = 3;
+let expWarnCallback = null;
+let currentProdFilter = 'All';
+let lockPinBuffer = '';
+let lockTargetUser = null;
+let txLog = [
+  { txNum:'#TX-0023', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 6:28 AM', items:[{name:'Amoxicillin 500mg',qty:2,price:12},{name:'Paracetamol 500mg',qty:10,price:4},{name:'Cetirizine 10mg',qty:5,price:9}], disc:'none', pay:'cash', subtotal:109, discAmt:0, total:109 },
+  { txNum:'#TX-0022', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 6:14 AM', items:[{name:'Mefenamic Acid 500mg',qty:4,price:8.50}], disc:'senior', pay:'gcash', subtotal:34, discAmt:6.80, total:27.20 },
+  { txNum:'#TX-0021', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 5:58 AM', items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:10,price:15}], disc:'none', pay:'maya', subtotal:840, discAmt:0, total:840 },
+  { txNum:'#TX-0020', emp:'Rodel Cruz', empColor:'#9333EA', empInitials:'RC', time:'Jun 25, 2026, 5:44 AM', items:[{name:'Amoxicillin 500mg',qty:8,price:12},{name:'Ascorbic Acid 500mg',qty:10,price:5}], disc:'pwd', pay:'cash', subtotal:146, discAmt:29.20, total:116.80 },
+  { txNum:'#TX-0019', emp:'Rodel Cruz', empColor:'#9333EA', empInitials:'RC', time:'Jun 25, 2026, 5:30 AM', items:[{name:'Omeprazole 20mg',qty:14,price:14}], disc:'none', pay:'cash', subtotal:196, discAmt:0, total:196 },
+];
+
+const REGISTERED_USERS = [
+  { key:'cashier',    name:'Ana Reyes',      role:'Cashier',    initials:'AR', color:'#2196A8' },
+  { key:'pharmacist', name:'Rodel Cruz',     role:'Pharmacist', initials:'RC', color:'#9333EA' },
+  { key:'manager',    name:'Josie Bautista', role:'Manager',    initials:'JB', color:'#F59E0B' },
+  { key:'admin',      name:'Maria Santos',   role:'Admin',      initials:'MS', color:'#2E7D4F' },
+];
+
+/* ── HELPERS ──────────────────────────────── */
+function daysLeft(d) {
+  return Math.round((new Date(d) - new Date()) / 86400000);
+}
+function totalStock(p) { return p.batches.reduce((s,b)=>s+b.qty,0); }
+function fefo(p) {
+  return p.batches.filter(b=>b.qty>0).sort((a,b)=>new Date(a.exp)-new Date(b.exp))[0];
+}
+function expSev(p) {
+  const b = fefo(p); if (!b) return 'none';
+  const d = daysLeft(b.exp);
+  return d <= 0 ? 'expired' : d <= 30 ? 'crit' : d <= 60 ? 'warn' : 'none';
+}
+function pesos(n) { return '₱'+n.toFixed(2); }
+function nowTime() { return new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:false}); }
+
+/* ── CLOCK ───────────────────────────────── */
+function tick() {
+  const el = document.getElementById('topbar-date');
+  if (el) el.textContent = new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});
+  const al = document.getElementById('att-date-lbl');
+  if (al) al.textContent = new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+setInterval(tick, 1000); tick();
+
+/* ── LOGIN / LOGOUT ───────────────────────── */
+window.doLogin = function() {
+  const sel = document.getElementById('l-user').value;
+  const pin = document.getElementById('l-pin').value;
+  if (!sel) { toast('Select an employee','error'); return; }
+  if (pin.length < 4) { toast('PIN must be 4 digits','error'); return; }
+  // First boot — initialize app
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  buildCatScroller();
+  renderProds(PRODUCTS);
+  renderInv(PRODUCTS);
+  renderExpiry('all');
+  renderEmpGrid();
+  // Set first user from login form
+  const map = {
+    admin:      REGISTERED_USERS.find(u=>u.key==='admin'),
+    cashier:    REGISTERED_USERS.find(u=>u.key==='cashier'),
+    pharmacist: REGISTERED_USERS.find(u=>u.key==='pharmacist'),
+    manager:    REGISTERED_USERS.find(u=>u.key==='manager'),
+  };
+  switchUser(map[sel]);
+  buildLockEmpGrid();
+};
+
+window.doLogout = function() {
+  cart = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('lock-screen').classList.remove('open');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pin').value = '';
+};
+
+function switchUser(user) {
+  currentUser = user;
+  // Sidebar
+  document.getElementById('sb-av').textContent = user.initials;
+  document.getElementById('sb-av').style.background = user.color;
+  document.getElementById('sb-name').textContent = user.name;
+  document.getElementById('sb-role').textContent = user.role;
+  // Topbar switch button
+  document.getElementById('topbar-switch-av').textContent = user.initials;
+  document.getElementById('topbar-switch-av').style.background = user.color;
+  document.getElementById('topbar-switch-name').textContent = user.name;
+  // POS order panel chip
+  const posAv = document.getElementById('pos-cashier-av');
+  const posName = document.getElementById('pos-cashier-name');
+  if (posAv) { posAv.textContent = user.initials; posAv.style.background = user.color; }
+  if (posName) posName.textContent = user.name;
+  toast(`Ready · ${user.name}`, 'success');
+}
+
+/* ── SIDEBAR ──────────────────────────────── */
+window.toggleSidebar = function() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sb-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+};
+window.closeSidebar = function() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('open');
+};
+
+/* ── LOCK SCREEN ──────────────────────────── */
+function buildLockEmpGrid() {
+  document.getElementById('lock-emp-grid').innerHTML = REGISTERED_USERS.map(u=>`
+    <div class="lock-emp-btn" onclick="lockSelectEmp('${u.key}')">
+      <div class="lock-emp-av" style="background:${u.color}">${u.initials}</div>
+      <div class="lock-emp-info">
+        <div class="lock-emp-name">${u.name}</div>
+        <div class="lock-emp-role">${u.role}</div>
+      </div>
+      <div class="lock-emp-arrow">›</div>
+    </div>`).join('');
+}
+
+window.showLock = function showLock() {
+  lockPinBuffer = '';
+  lockTargetUser = null;
+  // reset to emp picker state
+  document.getElementById('lock-emp-grid').classList.remove('hide');
+  document.getElementById('lock-pin-state').classList.remove('show');
+  document.getElementById('lock-heading').textContent = "Who's selling?";
+  document.getElementById('lock-error').textContent = '';
+  updatePinDots();
+  document.getElementById('lock-screen').classList.add('open');
+}
+
+window.lockSelectEmp = function(key) {
+  lockTargetUser = REGISTERED_USERS.find(u=>u.key===key);
+  if (!lockTargetUser) return;
+  // show PIN state
+  document.getElementById('lock-emp-grid').classList.add('hide');
+  document.getElementById('lock-pin-state').classList.add('show');
+  document.getElementById('lock-heading').textContent = 'Enter PIN';
+  document.getElementById('lock-sel-av').textContent = lockTargetUser.initials;
+  document.getElementById('lock-sel-av').style.background = lockTargetUser.color;
+  document.getElementById('lock-sel-name').textContent = lockTargetUser.name;
+  document.getElementById('lock-sel-role').textContent = lockTargetUser.role;
+  lockPinBuffer = '';
+  document.getElementById('lock-error').textContent = '';
+  updatePinDots();
+};
+
+window.lockGoBack = function() {
+  lockPinBuffer = '';
+  lockTargetUser = null;
+  document.getElementById('lock-emp-grid').classList.remove('hide');
+  document.getElementById('lock-pin-state').classList.remove('show');
+  document.getElementById('lock-heading').textContent = "Who's selling?";
+  document.getElementById('lock-error').textContent = '';
+  updatePinDots();
+};
+
+window.pinKey = function(k) {
+  if (lockPinBuffer.length >= 4) return;
+  lockPinBuffer += k;
+  updatePinDots();
+  if (lockPinBuffer.length === 4) {
+    setTimeout(validatePin, 180); // tiny delay so last dot fills before check
+  }
+};
+
+window.pinDel = function() {
+  lockPinBuffer = lockPinBuffer.slice(0,-1);
+  document.getElementById('lock-error').textContent = '';
+  updatePinDots();
+};
+
+function updatePinDots() {
+  for (let i=0;i<4;i++) {
+    document.getElementById('pd'+i).classList.toggle('filled', i < lockPinBuffer.length);
+  }
+}
+
+function validatePin() {
+  // Demo: any 4-digit PIN works — in production this checks against stored hash
+  if (lockPinBuffer.length === 4) {
+    document.getElementById('lock-screen').classList.remove('open');
+    switchUser(lockTargetUser);
+    lockPinBuffer = '';
+    lockTargetUser = null;
+    // Navigate to POS automatically on quick-switch
+    nav('pos');
+  } else {
+    document.getElementById('lock-error').textContent = 'Incorrect PIN. Try again.';
+    lockPinBuffer = '';
+    updatePinDots();
+  }
+}
+
+/* ── NAVIGATION ───────────────────────────── */
+const PAGE_TITLES = { dashboard:'Dashboard', pos:'Point of Sale', inventory:'Products & Stock', expiry:'Expiry Monitor', attendance:'Employees', txlog:'Transaction Log', reports:'Reports & Export' };
+
+window.nav = function(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[id]||id;
+  document.querySelectorAll('.nav-link[data-page], .bottom-nav-item[data-page]').forEach(n=>{
+    n.classList.toggle('active', n.dataset.page === id);
+  });
+  if (id === 'reports') {
+    document.getElementById('sync-alert').style.display = pendingSync > 0 ? 'flex' : 'none';
+    document.getElementById('sync-count').textContent = pendingSync;
+    document.getElementById('r-sales').textContent = '₱'+totalSales.toLocaleString();
+  }
+  if (id === 'txlog') {
+    populateTxLogEmpFilter();
+    renderTxLog();
+  }
+  closeSidebar();
+};
+
+/* ── CONN TOGGLE ──────────────────────────── */
+window.toggleOffline = function() {
+  offline = !offline;
+  const chip = document.getElementById('conn-chip');
+  if (offline) {
+    chip.className = 'conn-chip offline';
+    chip.innerHTML = '<div class="conn-chip-dot"></div> Offline';
+    pendingSync++;
+    toast('Offline mode — transactions saved locally','warning');
+  } else {
+    chip.className = 'conn-chip online';
+    chip.innerHTML = '<div class="conn-chip-dot"></div> Online';
+    toast('Back online!','success');
+  }
+};
+
+/* ── POS ──────────────────────────────────── */
+function buildCatScroller() {
+  const cats = ['All',...new Set(PRODUCTS.map(p=>p.cat))];
+  document.getElementById('cat-scroller').innerHTML = cats.map(c=>
+    `<div class="cat-pill ${c==='All'?'active':''}" onclick="setCat('${c}',this)">${c}</div>`
+  ).join('');
+}
+
+window.setCat = function(cat, el) {
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  currentProdFilter = cat;
+  const list = cat==='All' ? PRODUCTS : PRODUCTS.filter(p=>p.cat===cat);
+  renderProds(list);
+};
+
+window.filterProds = function() {
+  const q = document.getElementById('pos-q').value.toLowerCase();
+  const list = PRODUCTS.filter(p=>p.name.toLowerCase().includes(q)||p.generic.toLowerCase().includes(q));
+  renderProds(list);
+};
+
+function renderProds(list) {
+  document.getElementById('prod-grid').innerHTML = list.map(p=>{
+    const stock = totalStock(p);
+    const sev = expSev(p);
+    const oos = stock === 0;
+    const dot = sev!=='none' ? `<div class="prod-exp-dot ${sev}" title="Near expiry"></div>` : '';
+    return `<div class="prod-card${oos?' oos':''}" onclick="${oos?"toast('Out of stock','error')":`addToCart(${p.id})`}">
+      ${dot}
+      <div class="prod-card-name">${p.name}</div>
+      <div class="prod-card-generic">${p.generic}</div>
+      <div class="prod-card-price">${pesos(p.price)}</div>
+      <div class="prod-card-stock">${oos?'❌ Out of stock':'✓ '+stock+' '+p.unit+'s'}</div>
+    </div>`;
+  }).join('') || '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--slate400)">No products found</div>';
+}
+
+window.addToCart = function(pid) {
+  const p = PRODUCTS.find(x=>x.id===pid);
+  if (!p) return;
+  const b = fefo(p);
+  if (!b) { toast('Out of stock','error'); return; }
+  const d = daysLeft(b.exp);
+  if (d <= 0) { toast('Cannot sell expired medicine','error'); return; }
+  if (d <= 30) {
+    expWarnCallback = () => pushToCart(p, b);
+    document.getElementById('expwarn-text').textContent = `Batch ${b.id} of ${p.name} expires in ${d} days. Continue with sale?`;
+    openOverlay('ov-expwarn');
+    return;
+  }
+  pushToCart(p, b);
+};
+
+function pushToCart(p, b) {
+  const ex = cart.find(c=>c.pid===p.id && c.bid===b.id);
+  if (ex) { ex.qty++; } else { cart.push({ pid:p.id, bid:b.id, name:p.name, batch:b.id, exp:b.exp, price:p.price, qty:1, unit:p.unit }); }
+  renderCart();
+  toast(p.name+' added','success');
+}
+
+window.expWarnClose = function(proceed) {
+  closeOverlay('ov-expwarn');
+  if (proceed && expWarnCallback) expWarnCallback();
+  expWarnCallback = null;
+};
+
+window.chgQty = function(pid, delta) {
+  const i = cart.findIndex(c=>c.pid===pid);
+  if (i===-1) return;
+  cart[i].qty += delta;
+  if (cart[i].qty <= 0) cart.splice(i,1);
+  renderCart();
+};
+window.delCartItem = function(pid) { cart = cart.filter(c=>c.pid!==pid); renderCart(); };
+
+function calcDiscounted(subtotal) {
+  if (discType === 'none') return { discAmt: 0, total: subtotal };
+  const discAmt = subtotal * 0.20;
+  return { discAmt, total: subtotal - discAmt };
+}
+
+function renderCart() {
+  const el = document.getElementById('cart-scroll');
+  const foot = document.getElementById('order-foot');
+  if (!cart.length) {
+    el.innerHTML = '<div class="cart-empty-state"><span>🛒</span><p>No items yet</p></div>';
+    foot.style.display = 'none';
+    return;
+  }
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  const { discAmt, total } = calcDiscounted(subtotal);
+
+  el.innerHTML = cart.map(c=>`
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${c.name}</div>
+        <div class="cart-item-batch">Batch ${c.batch} · Exp ${c.exp}</div>
+      </div>
+      <div class="qty-ctrl">
+        <div class="qty-btn" onclick="chgQty(${c.pid},-1)">−</div>
+        <div class="qty-num">${c.qty}</div>
+        <div class="qty-btn" onclick="chgQty(${c.pid},1)">+</div>
+      </div>
+      <div class="cart-item-price">${pesos(c.price*c.qty)}</div>
+      <div class="cart-item-del" onclick="delCartItem(${c.pid})">✕</div>
+    </div>`).join('');
+
+  // summary breakdown
+  document.getElementById('sum-subtotal').textContent = pesos(subtotal);
+  const discRow = document.getElementById('sum-disc-row');
+  if (discType !== 'none') {
+    discRow.style.display = 'flex';
+    discRow.className = 'order-summary-row disc-line' + (discType==='pwd'?' pwd-line':'');
+    document.getElementById('sum-disc-label').textContent =
+      discType === 'senior' ? 'Senior Citizen Discount (20%)' : 'PWD Discount (20%)';
+    document.getElementById('sum-disc-amt').textContent = '−'+pesos(discAmt);
+  } else {
+    discRow.style.display = 'none';
+  }
+  document.getElementById('order-total').textContent = pesos(total);
+  document.getElementById('charge-btn').textContent = 'Charge '+pesos(total);
+  foot.style.display = 'block';
+}
+
+window.selDisc = function(d) {
+  discType = d;
+  document.getElementById('dp-none').className   = 'disc-pill' + (d==='none'  ?' sel-none':'');
+  document.getElementById('dp-senior').className = 'disc-pill' + (d==='senior'?' sel-senior':'');
+  document.getElementById('dp-pwd').className    = 'disc-pill' + (d==='pwd'   ?' sel-pwd':'');
+  renderCart();
+};
+
+window.selPay = function(m) {
+  payMethod = m;
+  ['cash','gcash','maya'].forEach(x=>document.getElementById('pm-'+x).classList.toggle('sel',x===m));
+};
+
+window.openPayModal = function() {
+  if (!cart.length) return;
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const { discAmt, total } = calcDiscounted(subtotal);
+  const discLabel = discType==='senior'?'Senior Citizen (20% off)':discType==='pwd'?'PWD (20% off)':'';
+  document.getElementById('pay-title').textContent = payMethod==='cash'?'💵 Cash Payment':payMethod==='gcash'?'📱 GCash':'💳 Maya';
+  document.getElementById('pay-sub').textContent =
+    discType!=='none'
+      ? `Subtotal ${pesos(subtotal)} · ${discLabel} · Total: ${pesos(total)}`
+      : `Total: ${pesos(total)}`;
+  const ci = document.getElementById('cash-in');
+  ci.value = payMethod!=='cash' ? total.toFixed(2) : '';
+  document.getElementById('change-amt').textContent = '₱0.00';
+  openOverlay('ov-pay');
+  setTimeout(()=>ci.focus(),200);
+};
+
+window.calcChange = function() {
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const { total } = calcDiscounted(subtotal);
+  const tendered = parseFloat(document.getElementById('cash-in').value)||0;
+  const change = tendered - total;
+  document.getElementById('change-amt').textContent = change>=0?pesos(change):'—';
+};
+
+window.confirmPay = function() {
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const { discAmt, total } = calcDiscounted(subtotal);
+  const tendered = parseFloat(document.getElementById('cash-in').value)||0;
+  if (payMethod==='cash' && tendered < total) { toast('Amount less than total','error'); return; }
+  closeOverlay('ov-pay');
+  const txNum = '#TX-'+String(txCounter++).padStart(4,'0');
+  totalSales += total;
+  // Save to transaction log
+  txLog.unshift({
+    txNum, emp: currentUser.name, empColor: currentUser.color, empInitials: currentUser.initials,
+    time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
+    items: cart.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
+    disc: discType, pay: payMethod,
+    subtotal, discAmt, total,
+  });
+  buildReceipt(txNum, subtotal, discAmt, total, tendered);
+  addTxToList(txNum, total);
+  document.getElementById('d-sales').textContent = '₱'+totalSales.toLocaleString();
+  discType = 'none';
+  selDisc('none');
+};
+
+function buildReceipt(txNum, subtotal, discAmt, total, tendered) {
+  const now = new Date();
+  const change = tendered - total;
+  const items = cart.map(c=>`<div class="receipt-item-row"><span class="ri-name">${c.name} ×${c.qty}</span><span class="ri-price">${pesos(c.price*c.qty)}</span></div>`).join('');
+  const discLine = discType!=='none'
+    ? `<div class="receipt-change-row"><span>${discType==='senior'?'Senior Citizen Discount':'PWD Discount'} (20%)</span><span style="color:#1E6F8F;font-weight:700">−${pesos(discAmt)}</span></div>`
+    : '';
+  const subLine = discType!=='none'
+    ? `<div class="receipt-change-row"><span>Subtotal</span><span>${pesos(subtotal)}</span></div>`
+    : '';
+  document.getElementById('receipt-body').innerHTML = `
+    <div class="receipt-tx">${txNum}</div>
+    <div style="font-size:10px;color:var(--slate400);margin-bottom:8px">${now.toLocaleString('en-PH')} · ${currentUser.name}</div>
+    <div class="receipt-items">${items}</div>
+    ${subLine}
+    ${discLine}
+    <div class="receipt-total"><span>TOTAL</span><span>${pesos(total)}</span></div>
+    ${payMethod==='cash'?`<div class="receipt-change-row"><span>Cash</span><span>${pesos(tendered)}</span></div><div class="receipt-change-row"><span>Change</span><span style="color:var(--g600);font-weight:700">${pesos(change)}</span></div>`:''}
+    <div class="receipt-change-row"><span>Payment</span><span>${payMethod.toUpperCase()}</span></div>
+  `;
+  openOverlay('ov-receipt');
+}
+
+window.resetOrder = function() {
+  closeOverlay('ov-receipt');
+  cart = [];
+  renderCart();
+  // Auto-lock after every completed sale
+  setTimeout(()=>showLock(), 300);
+};
+
+function addTxToList(txNum, amount) {
+  const list = document.getElementById('tx-list');
+  const row = document.createElement('div');
+  row.className = 'tx-row';
+  row.innerHTML = `<span class="tx-num">${txNum}</span><span class="tx-cashier">${currentUser.name}</span><span class="tx-count">${cart.length||1} item</span><span class="tx-amount">${pesos(amount)}</span>`;
+  list.prepend(row);
+}
+
+/* ── TRANSACTION LOG ──────────────────────── */
+function populateTxLogEmpFilter() {
+  const sel = document.getElementById('txlog-emp-filter');
+  const current = sel.value;
+  const names = [...new Set(txLog.map(t=>t.emp))];
+  sel.innerHTML = '<option value="all">All Employees</option>' +
+    names.map(n=>`<option value="${n}" ${current===n?'selected':''}>${n}</option>`).join('');
+}
+
+window.renderTxLog = function() {
+  const empFilter = document.getElementById('txlog-emp-filter').value;
+  const payFilter = document.getElementById('txlog-pay-filter').value;
+  const filtered = txLog.filter(t=>
+    (empFilter==='all' || t.emp===empFilter) &&
+    (payFilter==='all' || t.pay===payFilter)
+  );
+
+  // Employee summary cards
+  const empTotals = {};
+  txLog.forEach(t=>{
+    if (!empTotals[t.emp]) empTotals[t.emp] = { name:t.emp, color:t.empColor, initials:t.empInitials, count:0, total:0 };
+    empTotals[t.emp].count++;
+    empTotals[t.emp].total += t.total;
+  });
+  document.getElementById('txlog-emp-summary').innerHTML = Object.values(empTotals).map(e=>`
+    <div class="emp-summary-card">
+      <div class="emp-summary-av" style="background:${e.color}">${e.initials}</div>
+      <div class="emp-summary-info">
+        <div class="emp-summary-name">${e.name}</div>
+        <div class="emp-summary-stats">${e.count} transaction${e.count!==1?'s':''}</div>
+      </div>
+      <div class="emp-summary-total">${pesos(e.total)}</div>
+    </div>`).join('');
+
+  // Transaction rows (expandable)
+  document.getElementById('txlog-tbody').innerHTML = filtered.map((t,i)=>{
+    const discLabel = t.disc==='senior'?'<span class="chip chip-blue">Senior 20%</span>':t.disc==='pwd'?'<span class="chip chip-amber">PWD 20%</span>':'—';
+    const payLabel = t.pay==='cash'?'💵 Cash':t.pay==='gcash'?'📱 GCash':'💳 Maya';
+    const itemLines = t.items.map(it=>`
+      <div class="txlog-item-line">
+        <span>${it.name} ×${it.qty}</span>
+        <span style="font-family:var(--font-mono);font-weight:600">${pesos(it.price*it.qty)}</span>
+      </div>`).join('');
+    return `<tr class="tx-row-clickable" onclick="toggleTxRow('txexp-${i}', this)">
+        <td style="color:var(--slate300);font-size:12px" id="txarrow-${i}">▶</td>
+        <td class="td-mono" style="font-weight:700">${t.txNum}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:7px">
+            <div style="width:26px;height:26px;border-radius:50%;background:${t.empColor};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:white;flex-shrink:0">${t.empInitials}</div>
+            <span style="font-weight:600">${t.emp}</span>
+          </div>
+        </td>
+        <td style="color:var(--slate400);font-size:12px">${t.time}</td>
+        <td style="color:var(--slate500)">${t.items.length} item${t.items.length!==1?'s':''}</td>
+        <td>${discLabel}</td>
+        <td style="font-size:12px">${payLabel}</td>
+        <td class="td-mono" style="font-weight:800;color:var(--g600)">${pesos(t.total)}</td>
+      </tr>
+      <tr class="txlog-expand-row" id="txexp-${i}" style="display:none">
+        <td colspan="8">
+          <div class="txlog-items-list">
+            ${itemLines}
+            ${t.disc!=='none'?`<div class="txlog-item-line" style="color:var(--blue);margin-top:4px"><span>${t.disc==='senior'?'Senior Citizen':'PWD'} Discount (20%)</span><span style="font-family:var(--font-mono);font-weight:700">−${pesos(t.discAmt)}</span></div>`:''}
+            <div class="txlog-item-line" style="font-weight:800;color:var(--slate900);border-top:1px solid var(--slate200);padding-top:4px;margin-top:4px"><span>Total</span><span style="font-family:var(--font-mono)">${pesos(t.total)}</span></div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('') || `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--slate400)">No transactions found</td></tr>`;
+};
+
+window.toggleTxRow = function(expandId, row) {
+  const exp = document.getElementById(expandId);
+  const rowIdx = expandId.replace('txexp-','');
+  const arrow = document.getElementById('txarrow-'+rowIdx);
+  const isOpen = exp.style.display !== 'none';
+  exp.style.display = isOpen ? 'none' : 'table-row';
+  arrow.textContent = isOpen ? '▶' : '▼';
+};
+
+/* ── INVENTORY ────────────────────────────── */
+function renderInv(list) {
+  document.getElementById('inv-tbody').innerHTML = list.map(p=>{
+    const stock = totalStock(p);
+    const b = fefo(p)||p.batches[0];
+    const d = b ? daysLeft(b.exp) : 9999;
+    const sc = stock===0?'chip-red':stock<=20?'chip-amber':'chip-green';
+    const sl = stock===0?'Out of Stock':stock<=20?'Low ('+stock+')':'In Stock ('+stock+')';
+    const expStyle = d<=30?'color:var(--red);font-weight:700':d<=60?'color:var(--amber);font-weight:600':'color:var(--slate500)';
+    return `<tr>
+      <td><div class="td-name">${p.name}</div><div class="td-sub">${p.generic}</div></td>
+      <td>${p.cat}</td>
+      <td><span class="chip ${sc}">${sl}</span></td>
+      <td class="td-mono">${p.batches.length}</td>
+      <td class="td-mono" style="${expStyle}">${b?b.exp+' ('+d+'d)':'—'}</td>
+      <td class="td-mono" style="font-weight:700">${pesos(p.price)}</td>
+      <td><span class="td-action" onclick="toast('Edit: ${p.name}','success')">Edit</span></td>
+    </tr>`;
+  }).join('');
+}
+
+window.filterInv = function(e) {
+  const q = e.target.value.toLowerCase();
+  renderInv(PRODUCTS.filter(p=>p.name.toLowerCase().includes(q)||p.generic.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)));
+};
+
+/* ── EXPIRY ───────────────────────────────── */
+let expiryFilter = 'all';
+function renderExpiry(filter) {
+  expiryFilter = filter;
+  const rows = [];
+  PRODUCTS.forEach(p=>{
+    p.batches.forEach(b=>{
+      const d = daysLeft(b.exp);
+      const status = d<=0?'expired':d<=30?'crit':d<=60?'warn':'ok';
+      rows.push({ pname:p.name, batch:b.id, exp:b.exp, days:d, qty:b.qty, status });
+    });
+  });
+  const filt = filter==='all'?rows:filter==='crit'?rows.filter(r=>r.status==='crit'||r.status==='expired'):filter==='warn'?rows.filter(r=>r.status==='warn'):rows.filter(r=>r.status==='ok');
+  filt.sort((a,b)=>a.days-b.days);
+  document.getElementById('exp-tbody').innerHTML = filt.map(r=>{
+    const sc = r.status==='expired'||r.status==='crit'?'chip-red':r.status==='warn'?'chip-amber':'chip-green';
+    const sl = r.status==='expired'?'EXPIRED':r.status==='crit'?'Critical':r.status==='warn'?'Warning':'OK';
+    const dEl = r.days<=0?`<span style="color:var(--red);font-weight:800">EXPIRED</span>`:r.days<=30?`<span style="color:var(--red);font-weight:700">${r.days}</span>`:r.days<=60?`<span style="color:var(--amber);font-weight:600">${r.days}</span>`:r.days;
+    const action = r.status==='expired'?`<span class="td-action" style="color:var(--red)" onclick="toast('Write-off logged','success')">Write Off</span>`:r.status==='crit'?`<span class="td-action" style="color:var(--amber)" onclick="toast('Supplier return initiated','success')">Return</span>`:'—';
+    return `<tr>
+      <td><strong>${r.pname}</strong></td>
+      <td class="td-mono">${r.batch}</td>
+      <td class="td-mono">${r.exp}</td>
+      <td>${dEl}</td>
+      <td class="td-mono">${r.qty}</td>
+      <td><span class="chip ${sc}">${sl}</span></td>
+      <td>${action}</td>
+    </tr>`;
+  }).join('');
+  const critCount = rows.filter(r=>r.status==='crit').length;
+  document.getElementById('expiry-cnt').textContent = critCount;
+  document.getElementById('bn-expiry-cnt').textContent = critCount;
+}
+
+window.setExpiryFilter = function(f, el) {
+  document.querySelectorAll('.filter-pill').forEach(p=>p.className='filter-pill');
+  el.classList.add(f==='all'?'f-all':f==='crit'?'f-crit':f==='warn'?'f-warn':'f-ok');
+  renderExpiry(f);
+};
+
+/* ── ATTENDANCE ────────────────────────────── */
+function renderEmpGrid() {
+  document.getElementById('emp-grid').innerHTML = EMPLOYEES.map(e=>{
+    const statusText = e.timeOut?'Clocked Out':e.onBreak?'On Break':e.timeIn?'Clocked In':'Not In';
+    const dotClass = e.timeOut?'out':e.onBreak?'break':e.timeIn?'in':'out';
+    let btns;
+    if (e.timeOut) {
+      btns = `<button class="emp-btn ended full">Shift Ended</button>`;
+    } else if (e.onBreak) {
+      btns = `<button class="emp-btn brk full" onclick="empAction('${e.id}','brk-end')">End Break</button>`;
+    } else if (e.timeIn) {
+      btns = `<button class="emp-btn brk" onclick="empAction('${e.id}','brk')">Break</button>
+               <button class="emp-btn out" onclick="empAction('${e.id}','out')">Time Out</button>`;
+    } else {
+      btns = `<button class="emp-btn in full" onclick="empAction('${e.id}','in')">Time In</button>`;
+    }
+    return `<div class="emp-card">
+      <div class="emp-card-head">
+        <div class="emp-av" style="background:${e.color}">${e.initials}</div>
+        <div class="emp-av-info"><div class="emp-name">${e.name}</div><div class="emp-role">${e.role}</div></div>
+      </div>
+      <div class="emp-status-row"><div class="s-dot ${dotClass}"></div>${statusText}</div>
+      <div class="emp-time">${e.timeIn?'In: '+e.timeIn:' — '}${e.timeOut?' · Out: '+e.timeOut:''}</div>
+      <div class="emp-btns">${btns}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('shift-log-tbody').innerHTML = EMPLOYEES.filter(e=>e.timeIn).map(e=>{
+    const hrs = e.timeOut ? calcHrs(e.timeIn,e.timeOut) : '<span style="color:var(--g500)">Active</span>';
+    return `<tr>
+      <td><strong>${e.name}</strong></td>
+      <td style="color:var(--slate500)">${e.role}</td>
+      <td class="td-mono">${e.timeIn}</td>
+      <td class="td-mono" style="color:var(--amber)">${e.onBreak?'Now':'—'}</td>
+      <td class="td-mono">${e.timeOut||'—'}</td>
+      <td class="td-mono" style="font-weight:700;color:var(--g600)">${hrs}</td>
+    </tr>`;
+  }).join('');
+}
+
+function calcHrs(tin,tout) {
+  const [h1,m1]=tin.split(':').map(Number);
+  const [h2,m2]=tout.split(':').map(Number);
+  const m=(h2*60+m2)-(h1*60+m1);
+  return Math.floor(m/60)+'h '+m%60+'m';
+}
+
+window.empAction = function(id, action) {
+  const e = EMPLOYEES.find(x=>x.id===id);
+  if (!e) return;
+  const t = nowTime();
+  if (action==='in') { e.timeIn=t; toast(e.name+' clocked in','success'); }
+  else if (action==='out') { e.timeOut=t; toast(e.name+' clocked out','success'); }
+  else if (action==='brk') { e.onBreak=true; toast(e.name+' on break','warning'); }
+  else if (action==='brk-end') { e.onBreak=false; toast(e.name+' back from break','success'); }
+  renderEmpGrid();
+};
+
+/* ── SYNC ──────────────────────────────────── */
+window.doSync = function() {
+  toast('Syncing '+pendingSync+' transactions…','warning');
+  setTimeout(()=>{
+    pendingSync=0;
+    document.getElementById('sync-alert').style.display='none';
+    toast('All transactions synced!','success');
+  }, 2000);
+};
+
+/* ── MODAL HELPERS ─────────────────────────── */
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+window.closeOverlay = function(id) { document.getElementById(id).classList.remove('open'); };
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('open'); });
+});
+
+/* ── TOAST ─────────────────────────────────── */
+window.toast = function(msg, type='info') {
+  const stack = document.getElementById('toast-stack');
+  const icons = { success:'✓', error:'✕', warning:'⚠', info:'ℹ' };
+  const el = document.createElement('div');
+  el.className = `toast t-${type}`;
+  el.innerHTML = `<span>${icons[type]||'ℹ'}</span> ${msg}`;
+  stack.appendChild(el);
+  setTimeout(()=>el.remove(), 3200);
+};
+
+})();
+</script>
+</body>
+</html>
