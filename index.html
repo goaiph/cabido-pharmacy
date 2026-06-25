@@ -758,11 +758,22 @@ input, select, button, textarea { font-family: var(--font-body); }
 .overlay.open { display: flex; }
 .modal {
   background: var(--white); border-radius: var(--r-xl) var(--r-xl) 0 0;
-  width: 100%; max-width: 480px; padding: 24px 22px;
-  padding-bottom: calc(22px + env(safe-area-inset-bottom));
+  width: 100%; max-width: 480px; padding: 20px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   animation: slideUp .25s cubic-bezier(.4,0,.2,1);
-  max-height: 90vh; overflow-y: auto;
+  max-height: 96vh; overflow-y: auto;
 }
+
+/* CPV modal needs tighter spacing to fit PIN pad on screen */
+#ov-cashier-pin .modal {
+  padding: 16px 18px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+#ov-cashier-pin .cpv-header { margin-bottom: 12px; }
+#ov-cashier-pin .cpv-title { font-size: 16px; }
+#ov-cashier-pin .modal-handle { margin-bottom: 12px; }
+#ov-cashier-pin .modal-actions { margin-top: 8px; }
+#ov-cashier-pin .modal-actions .btn { padding: 10px; }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 .modal-handle {
   width: 36px; height: 4px; background: var(--slate200); border-radius: 2px;
@@ -836,6 +847,64 @@ input, select, button, textarea { font-family: var(--font-body); }
 
 /* expiry warning modal */
 .warn-icon { font-size: 40px; text-align: center; display: block; margin-bottom: 8px; }
+
+/* cashier PIN verification modal */
+.cpv-header { margin-bottom: 16px; }
+.cpv-title {
+  font-family: var(--font-display); font-size: 17px; font-weight: 800;
+  color: var(--slate900); margin-bottom: 3px;
+}
+.cpv-sub { font-size: 12px; color: var(--slate400); }
+
+.cpv-emp-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px;
+}
+.cpv-emp-btn {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; border-radius: var(--r); cursor: pointer;
+  border: 2px solid var(--slate200); background: var(--slate100);
+  transition: all .15s;
+}
+.cpv-emp-btn:hover { border-color: #9DCF46; background: var(--g100); }
+.cpv-emp-av {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 11px; font-weight: 800; color: white;
+}
+.cpv-emp-info .cpv-emp-name { font-size: 12px; font-weight: 700; color: var(--slate900); }
+.cpv-emp-info .cpv-emp-role { font-size: 10px; color: var(--slate400); }
+
+.cpv-pin-state { display: none; }
+.cpv-pin-state.show { display: block; }
+.cpv-emp-grid.hide { display: none; }
+
+.cpv-sel-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--slate100); border-radius: var(--r-sm);
+  margin-bottom: 16px;
+}
+.cpv-sel-av {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 12px; font-weight: 800; color: white;
+}
+.cpv-sel-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+.cpv-sel-role { font-size: 11px; color: var(--slate400); }
+.cpv-change-btn {
+  margin-left: auto; padding: 5px 12px; border-radius: 20px;
+  border: 1.5px solid var(--slate300); background: white;
+  font-size: 11px; font-weight: 700; color: var(--slate500); cursor: pointer;
+  font-family: var(--font-body); transition: all .15s;
+}
+.cpv-change-btn:hover { border-color: #52C3E3; color: #1E6F8F; }
+
+.cpv-pin-dots {
+  display: flex; justify-content: center; gap: 14px; margin-bottom: 12px;
+}
+.cpv-error {
+  text-align: center; font-size: 12px; color: var(--red);
+  font-weight: 600; min-height: 14px; margin-top: 6px;
+}
 
 /* ═══════════════════════════════════════════
    TOAST
@@ -941,28 +1010,51 @@ input, select, button, textarea { font-family: var(--font-body); }
 .lock-pin-dots {
   display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
 }
-.pin-dot {
+/* Lock screen pin dots — dark bg, white border */
+#lock-screen .pin-dot {
   width: 14px; height: 14px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,.3); background: transparent;
   transition: all .15s;
 }
-.pin-dot.filled { background: #9DCF46; border-color: #9DCF46; box-shadow: 0 0 8px rgba(157,207,70,.6); }
+#lock-screen .pin-dot.filled { background: #9DCF46; border-color: #9DCF46; box-shadow: 0 0 8px rgba(157,207,70,.6); }
+
+/* CPV modal pin dots — light bg, slate border */
+#ov-cashier-pin .pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--slate300); background: transparent;
+  transition: all .15s;
+}
+#ov-cashier-pin .pin-dot.filled { background: #9DCF46; border-color: #9DCF46; box-shadow: 0 0 6px rgba(157,207,70,.4); }
 
 /* PIN numpad */
 .pin-pad {
-  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 7px;
 }
-.pin-key {
-  padding: 14px 8px; border-radius: var(--r); border: none;
+/* Lock screen pin keys — dark bg */
+#lock-screen .pin-key {
+  padding: 13px 8px; border-radius: var(--r); border: none;
   background: rgba(255,255,255,.07); color: var(--white);
   font-family: var(--font-display); font-size: 18px; font-weight: 700;
   cursor: pointer; transition: all .15s; text-align: center;
 }
-.pin-key:hover { background: rgba(157,207,70,.2); color: #9DCF46; }
-.pin-key:active { transform: scale(.94); background: #9DCF46; color: #1a2e04; }
-.pin-key.del { font-size: 16px; background: rgba(255,255,255,.04); color: rgba(255,255,255,.5); }
-.pin-key.del:hover { background: rgba(239,68,68,.2); color: var(--red); }
-.pin-key.empty { background: transparent; cursor: default; pointer-events: none; }
+#lock-screen .pin-key:hover { background: rgba(157,207,70,.2); color: #9DCF46; }
+#lock-screen .pin-key:active { transform: scale(.94); background: #9DCF46; color: #1a2e04; }
+#lock-screen .pin-key.del { font-size: 16px; background: rgba(255,255,255,.04); color: rgba(255,255,255,.5); }
+#lock-screen .pin-key.del:hover { background: rgba(239,68,68,.2); color: var(--red); }
+#lock-screen .pin-key.empty { background: transparent; cursor: default; pointer-events: none; }
+
+/* CPV modal pin keys — light bg */
+#ov-cashier-pin .pin-key {
+  padding: 11px 8px; border-radius: var(--r-sm); border: 1.5px solid var(--slate200);
+  background: var(--slate100); color: var(--slate900);
+  font-family: var(--font-display); font-size: 20px; font-weight: 700;
+  cursor: pointer; transition: all .15s; text-align: center;
+}
+#ov-cashier-pin .pin-key:hover { background: var(--g100); border-color: #9DCF46; color: #456912; }
+#ov-cashier-pin .pin-key:active { transform: scale(.94); background: #9DCF46; color: #1a2e04; border-color: #9DCF46; }
+#ov-cashier-pin .pin-key.del { background: var(--slate100); color: var(--slate500); border-color: var(--slate200); font-size: 16px; }
+#ov-cashier-pin .pin-key.del:hover { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+#ov-cashier-pin .pin-key.empty { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
 
 .lock-error {
   text-align: center; font-size: 12px; color: var(--red);
@@ -1497,7 +1589,55 @@ input, select, button, textarea { font-family: var(--font-body); }
 
 <!-- ─── MODALS ─────────────────────────────── -->
 
-<!-- Expiry warning -->
+<!-- Cashier PIN verification (before payment) -->
+<div class="overlay" id="ov-cashier-pin">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="cpv-header">
+      <div class="cpv-title">Who's processing this sale?</div>
+      <div class="cpv-sub">Select your name then enter your PIN</div>
+    </div>
+    <!-- Step 1: Employee grid -->
+    <div id="cpv-emp-grid" class="cpv-emp-grid"></div>
+    <!-- Step 2: PIN entry -->
+    <div id="cpv-pin-state" class="cpv-pin-state">
+      <div class="cpv-sel-row" id="cpv-sel-row">
+        <div class="cpv-sel-av" id="cpv-sel-av" style="background:#2196A8">AR</div>
+        <div>
+          <div class="cpv-sel-name" id="cpv-sel-name">Ana Reyes</div>
+          <div class="cpv-sel-role" id="cpv-sel-role">Cashier</div>
+        </div>
+        <button class="cpv-change-btn" onclick="cpvGoBack()">Change</button>
+      </div>
+      <div class="cpv-pin-dots">
+        <div class="pin-dot" id="cpd0"></div>
+        <div class="pin-dot" id="cpd1"></div>
+        <div class="pin-dot" id="cpd2"></div>
+        <div class="pin-dot" id="cpd3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="cpvKey('1')">1</button>
+        <button class="pin-key" onclick="cpvKey('2')">2</button>
+        <button class="pin-key" onclick="cpvKey('3')">3</button>
+        <button class="pin-key" onclick="cpvKey('4')">4</button>
+        <button class="pin-key" onclick="cpvKey('5')">5</button>
+        <button class="pin-key" onclick="cpvKey('6')">6</button>
+        <button class="pin-key" onclick="cpvKey('7')">7</button>
+        <button class="pin-key" onclick="cpvKey('8')">8</button>
+        <button class="pin-key" onclick="cpvKey('9')">9</button>
+        <button class="pin-key empty"></button>
+        <button class="pin-key" onclick="cpvKey('0')">0</button>
+        <button class="pin-key del" onclick="cpvDel()">⌫</button>
+      </div>
+      <div class="cpv-error" id="cpv-error"></div>
+    </div>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn btn-ghost" onclick="closeOverlay('ov-cashier-pin')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="overlay" id="ov-expwarn">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1608,6 +1748,9 @@ let expWarnCallback = null;
 let currentProdFilter = 'All';
 let lockPinBuffer = '';
 let lockTargetUser = null;
+let cpvPinBuffer = '';      // PIN buffer for cashier verification at checkout
+let cpvTargetUser = null;   // employee selected in CPV modal
+let txCashier = null;       // verified cashier for current transaction
 let txLog = [
   { txNum:'#TX-0023', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 6:28 AM', items:[{name:'Amoxicillin 500mg',qty:2,price:12},{name:'Paracetamol 500mg',qty:10,price:4},{name:'Cetirizine 10mg',qty:5,price:9}], disc:'none', pay:'cash', subtotal:109, discAmt:0, total:109 },
   { txNum:'#TX-0022', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 6:14 AM', items:[{name:'Mefenamic Acid 500mg',qty:4,price:8.50}], disc:'senior', pay:'gcash', subtotal:34, discAmt:6.80, total:27.20 },
@@ -1801,6 +1944,88 @@ function validatePin() {
   }
 }
 
+/* ── CASHIER PIN VERIFICATION (CPV) ──────────── */
+function buildCpvEmpGrid() {
+  document.getElementById('cpv-emp-grid').innerHTML = REGISTERED_USERS.map(u=>`
+    <div class="cpv-emp-btn" onclick="cpvSelectEmp('${u.key}')">
+      <div class="cpv-emp-av" style="background:${u.color}">${u.initials}</div>
+      <div class="cpv-emp-info">
+        <div class="cpv-emp-name">${u.name}</div>
+        <div class="cpv-emp-role">${u.role}</div>
+      </div>
+    </div>`).join('');
+}
+
+function openCpvModal() {
+  cpvPinBuffer = '';
+  cpvTargetUser = null;
+  // reset to emp picker
+  document.getElementById('cpv-emp-grid').classList.remove('hide');
+  document.getElementById('cpv-pin-state').classList.remove('show');
+  document.getElementById('cpv-error').textContent = '';
+  updateCpvDots();
+  buildCpvEmpGrid();
+  openOverlay('ov-cashier-pin');
+}
+
+window.cpvSelectEmp = function(key) {
+  cpvTargetUser = REGISTERED_USERS.find(u=>u.key===key);
+  if (!cpvTargetUser) return;
+  document.getElementById('cpv-emp-grid').classList.add('hide');
+  document.getElementById('cpv-pin-state').classList.add('show');
+  document.getElementById('cpv-sel-av').textContent = cpvTargetUser.initials;
+  document.getElementById('cpv-sel-av').style.background = cpvTargetUser.color;
+  document.getElementById('cpv-sel-name').textContent = cpvTargetUser.name;
+  document.getElementById('cpv-sel-role').textContent = cpvTargetUser.role;
+  cpvPinBuffer = '';
+  document.getElementById('cpv-error').textContent = '';
+  updateCpvDots();
+};
+
+window.cpvGoBack = function() {
+  cpvPinBuffer = '';
+  cpvTargetUser = null;
+  document.getElementById('cpv-emp-grid').classList.remove('hide');
+  document.getElementById('cpv-pin-state').classList.remove('show');
+  document.getElementById('cpv-error').textContent = '';
+  updateCpvDots();
+};
+
+window.cpvKey = function(k) {
+  if (cpvPinBuffer.length >= 4) return;
+  cpvPinBuffer += k;
+  updateCpvDots();
+  if (cpvPinBuffer.length === 4) setTimeout(validateCpv, 180);
+};
+
+window.cpvDel = function() {
+  cpvPinBuffer = cpvPinBuffer.slice(0,-1);
+  document.getElementById('cpv-error').textContent = '';
+  updateCpvDots();
+};
+
+function updateCpvDots() {
+  for (let i=0;i<4;i++) {
+    document.getElementById('cpd'+i).classList.toggle('filled', i < cpvPinBuffer.length);
+  }
+}
+
+function validateCpv() {
+  // Demo: any 4-digit PIN accepted — production checks hashed PIN
+  if (cpvPinBuffer.length === 4) {
+    txCashier = cpvTargetUser; // lock in verified cashier for this transaction
+    cpvPinBuffer = '';
+    cpvTargetUser = null;
+    closeOverlay('ov-cashier-pin');
+    // Now open the actual payment modal
+    doOpenPayModal();
+  } else {
+    document.getElementById('cpv-error').textContent = 'Incorrect PIN. Try again.';
+    cpvPinBuffer = '';
+    updateCpvDots();
+  }
+}
+
 /* ── NAVIGATION ───────────────────────────── */
 const PAGE_TITLES = { dashboard:'Dashboard', pos:'Point of Sale', inventory:'Products & Stock', expiry:'Expiry Monitor', attendance:'Employees', txlog:'Transaction Log', reports:'Reports & Export' };
 
@@ -1977,8 +2202,14 @@ window.selPay = function(m) {
   ['cash','gcash','maya'].forEach(x=>document.getElementById('pm-'+x).classList.toggle('sel',x===m));
 };
 
+// Called by Charge button — opens CPV (cashier PIN) first
 window.openPayModal = function() {
   if (!cart.length) return;
+  openCpvModal();
+};
+
+// Called after PIN verified — opens actual payment modal
+function doOpenPayModal() {
   const subtotal = cart.reduce((s,c)=>s+c.price*c.qty,0);
   const { discAmt, total } = calcDiscounted(subtotal);
   const discLabel = discType==='senior'?'Senior Citizen (20% off)':discType==='pwd'?'PWD (20% off)':'';
@@ -2010,22 +2241,25 @@ window.confirmPay = function() {
   closeOverlay('ov-pay');
   const txNum = '#TX-'+String(txCounter++).padStart(4,'0');
   totalSales += total;
-  // Save to transaction log
+  // Use PIN-verified txCashier for attribution — fallback to currentUser
+  const cashier = txCashier || currentUser;
   txLog.unshift({
-    txNum, emp: currentUser.name, empColor: currentUser.color, empInitials: currentUser.initials,
+    txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
     time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
     items: cart.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
     disc: discType, pay: payMethod,
     subtotal, discAmt, total,
   });
-  buildReceipt(txNum, subtotal, discAmt, total, tendered);
-  addTxToList(txNum, total);
+  buildReceipt(txNum, subtotal, discAmt, total, tendered, cashier);
+  addTxToList(txNum, total, cashier);
   document.getElementById('d-sales').textContent = '₱'+totalSales.toLocaleString();
   discType = 'none';
   selDisc('none');
+  txCashier = null; // clear verified cashier after each transaction
 };
 
-function buildReceipt(txNum, subtotal, discAmt, total, tendered) {
+function buildReceipt(txNum, subtotal, discAmt, total, tendered, cashier) {
+  cashier = cashier || currentUser;
   const now = new Date();
   const change = tendered - total;
   const items = cart.map(c=>`<div class="receipt-item-row"><span class="ri-name">${c.name} ×${c.qty}</span><span class="ri-price">${pesos(c.price*c.qty)}</span></div>`).join('');
@@ -2037,7 +2271,7 @@ function buildReceipt(txNum, subtotal, discAmt, total, tendered) {
     : '';
   document.getElementById('receipt-body').innerHTML = `
     <div class="receipt-tx">${txNum}</div>
-    <div style="font-size:10px;color:var(--slate400);margin-bottom:8px">${now.toLocaleString('en-PH')} · ${currentUser.name}</div>
+    <div style="font-size:10px;color:var(--slate400);margin-bottom:8px">${now.toLocaleString('en-PH')} · ${cashier.name}</div>
     <div class="receipt-items">${items}</div>
     ${subLine}
     ${discLine}
@@ -2052,15 +2286,14 @@ window.resetOrder = function() {
   closeOverlay('ov-receipt');
   cart = [];
   renderCart();
-  // Auto-lock after every completed sale
-  setTimeout(()=>showLock(), 300);
 };
 
-function addTxToList(txNum, amount) {
+function addTxToList(txNum, amount, cashier) {
+  cashier = cashier || currentUser;
   const list = document.getElementById('tx-list');
   const row = document.createElement('div');
   row.className = 'tx-row';
-  row.innerHTML = `<span class="tx-num">${txNum}</span><span class="tx-cashier">${currentUser.name}</span><span class="tx-count">${cart.length||1} item</span><span class="tx-amount">${pesos(amount)}</span>`;
+  row.innerHTML = `<span class="tx-num">${txNum}</span><span class="tx-cashier">${cashier.name}</span><span class="tx-count">${cart.length||1} item</span><span class="tx-amount">${pesos(amount)}</span>`;
   list.prepend(row);
 }
 
