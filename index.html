@@ -1342,8 +1342,9 @@ input, select, button, textarea { font-family: var(--font-body); }
 .txlog-item-line { display: flex; justify-content: space-between; }
 .tx-row-clickable { cursor: pointer; }
 .tx-row-clickable:hover td { background: var(--slate100) !important; }
-
-.tx-row-clickable:hover td { background: var(--slate100) !important; }
+.tx-row-voided td { opacity: .55; }
+.tx-row-voided:hover td { background: var(--red-bg) !important; opacity: .75; }
+.void-strike { text-decoration: line-through; color: var(--red); }
 
 /* ═══════════════════════════════════════════
    SALES SUMMARY PAGE
@@ -1890,7 +1891,6 @@ input, select, button, textarea { font-family: var(--font-body); }
       </div>
     </div>
 
-    <!-- ── REPORTS ── -->
     <!-- ── SALES SUMMARY ── -->
     <div class="page page-body" id="page-summary">
       <!-- Period selector -->
@@ -1926,6 +1926,7 @@ input, select, button, textarea { font-family: var(--font-body); }
     </div>
 
     <!-- ── REPORTS ── -->
+    <div class="page page-body" id="page-reports">
       <div class="sync-alert" id="sync-alert" style="display:none">
         <span style="font-size:20px">⚠️</span>
         <div class="sync-alert-text"><strong id="sync-count">3</strong> offline transactions pending sync.</div>
@@ -1992,6 +1993,11 @@ input, select, button, textarea { font-family: var(--font-body); }
           <option value="gcash">GCash</option>
           <option value="maya">Maya</option>
         </select>
+        <select class="txlog-filter-select" id="txlog-status-filter" onchange="renderTxLog()">
+          <option value="all">All Transactions</option>
+          <option value="done">Completed</option>
+          <option value="voided">Voided</option>
+        </select>
         <button class="btn btn-ghost btn-sm" onclick="toast('Transaction log exported to Excel','success')">📥 Export</button>
       </div>
       <!-- Log table -->
@@ -2008,6 +2014,7 @@ input, select, button, textarea { font-family: var(--font-body); }
               <th>Discount</th>
               <th>Payment</th>
               <th>Total</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="txlog-tbody"></tbody>
@@ -2223,6 +2230,36 @@ input, select, button, textarea { font-family: var(--font-body); }
   </div>
 </div>
 
+<!-- Void / Refund Confirm modal -->
+<div class="overlay" id="ov-void">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <span class="warn-icon">↩️</span>
+    <div class="modal-title">Void Transaction?</div>
+    <div class="modal-sub" id="void-tx-info">This will reverse #TX-0001 and deduct ₱0.00 from today's sales.</div>
+    <div style="margin-bottom:4px">
+      <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--slate500);display:block;margin-bottom:6px">Reason for Void</label>
+      <select id="void-reason" style="width:100%;padding:10px 12px;border:1.5px solid var(--slate200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;outline:none;background:var(--slate100);color:var(--slate900)">
+        <option value="">— Select reason —</option>
+        <option value="Customer returned items">Customer returned items</option>
+        <option value="Wrong items dispensed">Wrong items dispensed</option>
+        <option value="Duplicate transaction">Duplicate transaction</option>
+        <option value="Customer cancelled">Customer cancelled</option>
+        <option value="Pricing error">Pricing error</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div id="void-other-wrap" style="display:none;margin-top:8px">
+      <input type="text" id="void-other-text" placeholder="Describe the reason…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--slate200);border-radius:var(--r-sm);font-family:var(--font-body);font-size:13px;outline:none;background:var(--slate100)">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeOverlay('ov-void')">Cancel</button>
+      <button class="btn" onclick="confirmVoid()" style="background:var(--red);color:white;flex:1;padding:12px">↩️ Confirm Void</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast stack -->
 <div class="toast-stack" id="toast-stack"></div>
 
@@ -2285,6 +2322,7 @@ let cpvPinBuffer = '';      // PIN buffer for cashier verification at checkout
 let cpvTargetUser = null;   // employee selected in CPV modal
 let txCashier = null;       // verified cashier for current transaction
 let cpvContext = 'queue';   // 'queue' | 'cashier' — what happens after PIN
+let voidTargetTxNum = null; // transaction number being voided
 let txLog = [
   // ── TODAY (Jun 29, 2026) ──
   { txNum:'#TX-0030', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:52 AM', items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:1200, discAmt:240,   total:960 },
@@ -3286,18 +3324,19 @@ function renderSalesSummary() {
   const tx = getFilteredTx();
 
   // ── Core metrics ──
-  const grossSales    = tx.reduce((s,t)=>s+t.subtotal, 0);
-  const totalDisc     = tx.reduce((s,t)=>s+t.discAmt, 0);
-  const netSales      = tx.reduce((s,t)=>s+t.total, 0);
-  const refunds       = 0; // placeholder — refund module not built yet
-  const txCount       = tx.length;
+  const grossSales    = tx.reduce((s,t)=>s+(t.status==='voided'?0:t.subtotal), 0);
+  const totalDisc     = tx.reduce((s,t)=>s+(t.status==='voided'?0:t.discAmt), 0);
+  const netSales      = tx.reduce((s,t)=>s+(t.status==='voided'?0:t.total), 0);
+  const refunds       = txLog.filter(t=>t.status==='voided').reduce((s,t)=>s+t.total, 0);
+  const refundCount   = txLog.filter(t=>t.status==='voided').length;
+  const txCount       = tx.filter(t=>t.status!=='voided').length;
   const avgBasket     = txCount ? netSales/txCount : 0;
 
   // COGS — match items to product cost
   const costMap = {};
   PRODUCTS.forEach(p=>{ costMap[p.name] = p.cost||0; });
   let totalCOGS = 0;
-  tx.forEach(t=>{
+  tx.filter(t=>t.status!=='voided').forEach(t=>{
     t.items.forEach(it=>{
       const cost = costMap[it.name]||0;
       totalCOGS += cost * it.qty;
@@ -3368,9 +3407,9 @@ function renderSalesSummary() {
     </div>
     <div class="ss-hero-card refund">
       <div class="ss-hero-icon">↩️</div>
-      <div class="ss-hero-label">Refunds</div>
+      <div class="ss-hero-label">Refunds / Voided</div>
       <div class="ss-hero-value">${pesos(refunds)}</div>
-      <div class="ss-hero-sub">0 refund transactions</div>
+      <div class="ss-hero-sub">${refundCount} voided transaction${refundCount!==1?'s':''}</div>
     </div>`;
 
   // Income breakdown
@@ -3505,36 +3544,84 @@ function renderSalesSummary() {
        </div>`
     : '';
 
+  // Build pharmacist perf HTML using safe string building
+  function buildPharmRow(p, i) {
+    var shareOfTagged = pharmNetTotal > 0 ? ((p.total/pharmNetTotal)*100).toFixed(1) : 0;
+    var barW = (p.total/topPharmTotal*100).toFixed(1);
+    var medals = ['🥇','🥈','🥉'];
+    var medal = medals[i] || '';
+    var medalHtml = medal ? '<span style="position:absolute;top:-6px;right:-6px;font-size:13px">' + medal + '</span>' : '';
+    var orderWord = p.count !== 1 ? 's' : '';
+    var avgAmt = p.count ? pesos(p.total/p.count) : pesos(0);
+    return '<div class="cashier-perf-row" style="flex-direction:column;align-items:stretch;gap:8px">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<div class="cashier-av" style="background:' + p.color + ';position:relative;flex-shrink:0">'
+          + p.initials + medalHtml
+        + '</div>'
+        + '<div class="cashier-perf-info">'
+          + '<div class="cashier-perf-name">' + p.name + '</div>'
+          + '<div class="cashier-perf-sub">' + p.count + ' order' + orderWord + ' · ' + p.items + ' units dispensed · Avg ' + avgAmt + '</div>'
+        + '</div>'
+        + '<div class="cashier-perf-stats">'
+          + '<div class="cashier-perf-total">' + pesos(p.total) + '</div>'
+          + '<div class="cashier-perf-txcount">' + shareOfTagged + '% of pharmacist sales</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:0 42px 4px;display:flex;align-items:center;gap:8px">'
+        + '<div style="flex:1;height:8px;background:var(--slate100);border-radius:4px;overflow:hidden">'
+          + '<div style="height:100%;width:' + barW + '%;background:' + p.color + ';border-radius:4px;opacity:.85;transition:width .7s cubic-bezier(.4,0,.2,1)"></div>'
+        + '</div>'
+        + '<span style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--slate400);width:36px;text-align:right">' + barW + '%</span>'
+      + '</div>'
+    + '</div>';
+  }
   document.getElementById('ss-pharmacist-perf').innerHTML = pharms.length
-    ? pharms.map((p, i)=>{
-        const shareOfTagged = pharmNetTotal > 0 ? ((p.total/pharmNetTotal)*100).toFixed(1) : 0;
-        const barW = (p.total/topPharmTotal*100).toFixed(1);
-        const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
-        return `<div class="cashier-perf-row" style="flex-direction:column;align-items:stretch;gap:8px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="cashier-av" style="background:${p.color};position:relative;flex-shrink:0">
-              ${p.initials}
-              ${medal?`<span style="position:absolute;top:-6px;right:-6px;font-size:13px">${medal}</span>`:''}
-            </div>
-            <div class="cashier-perf-info">
-              <div class="cashier-perf-name">${p.name}</div>
-              <div class="cashier-perf-sub">${p.count} order${p.count!==1?'s':''} · ${p.items} units dispensed · Avg ${pesos(p.count?p.total/p.count:0)}</div>
-            </div>
-            <div class="cashier-perf-stats">
-              <div class="cashier-perf-total">${pesos(p.total)}</div>
-              <div class="cashier-perf-txcount">${shareOfTagged}% of pharmacist sales</div>
-            </div>
-          </div>
-          <div style="padding:0 42px 4px;display:flex;align-items:center;gap:8px">
-            <div style="flex:1;height:8px;background:var(--slate100);border-radius:4px;overflow:hidden">
-              <div style="height:100%;width:${barW}%;background:${p.color};border-radius:4px;opacity:.85;transition:width .7s cubic-bezier(.4,0,.2,1)"></div>
-            </div>
-            <span style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--slate400);width:36px;text-align:right">${barW}%</span>
-          </div>
-        </div>`;
-      }).join('') + untaggedNote
+    ? pharms.map(buildPharmRow).join('') + untaggedNote
     : '<div style="padding:20px;text-align:center;color:var(--slate400);font-size:13px">No pharmacist-tagged orders yet</div>';
 }
+
+/* ── VOID / REFUND ───────────────────────── */
+window.openVoid = function(txNum) {
+  const t = txLog.find(x=>x.txNum===txNum);
+  if (!t) return;
+  if (t.status === 'voided') { toast('Already voided', 'error'); return; }
+  voidTargetTxNum = txNum;
+  document.getElementById('void-tx-info').textContent =
+    `This will reverse ${txNum} and deduct ${pesos(t.total)} from sales.`;
+  document.getElementById('void-reason').value = '';
+  document.getElementById('void-other-wrap').style.display = 'none';
+  document.getElementById('void-reason').onchange = function() {
+    document.getElementById('void-other-wrap').style.display =
+      this.value === 'Other' ? 'block' : 'none';
+  };
+  openOverlay('ov-void');
+};
+
+window.confirmVoid = function() {
+  const reason = document.getElementById('void-reason').value;
+  if (!reason) { toast('Please select a reason', 'error'); return; }
+  const fullReason = reason === 'Other'
+    ? (document.getElementById('void-other-text').value.trim() || 'Other')
+    : reason;
+
+  const t = txLog.find(x=>x.txNum===voidTargetTxNum);
+  if (!t) return;
+
+  // Mark as voided
+  t.status = 'voided';
+  t.voidReason = fullReason;
+  t.voidedBy = currentUser.name;
+  t.voidedAt = new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});
+
+  // Reverse sales total
+  totalSales -= t.total;
+  document.getElementById('d-sales').textContent = '₱'+Math.max(0,totalSales).toLocaleString();
+
+  closeOverlay('ov-void');
+  voidTargetTxNum = null;
+  renderTxLog();
+  toast(`${t.txNum} voided — ${pesos(t.total)} reversed`, 'error');
+};
 
 /* ── TRANSACTION LOG ──────────────────────── */
 function populateTxLogEmpFilter() {
@@ -3546,16 +3633,18 @@ function populateTxLogEmpFilter() {
 }
 
 window.renderTxLog = function() {
-  const empFilter = document.getElementById('txlog-emp-filter').value;
-  const payFilter = document.getElementById('txlog-pay-filter').value;
+  const empFilter    = document.getElementById('txlog-emp-filter').value;
+  const payFilter    = document.getElementById('txlog-pay-filter').value;
+  const statusFilter = document.getElementById('txlog-status-filter').value;
   const filtered = txLog.filter(t=>
-    (empFilter==='all' || t.emp===empFilter) &&
-    (payFilter==='all' || t.pay===payFilter)
+    (empFilter==='all'    || t.emp===empFilter) &&
+    (payFilter==='all'    || t.pay===payFilter) &&
+    (statusFilter==='all' || (t.status||'done')===statusFilter)
   );
 
-  // Employee summary cards
+  // Employee summary cards — exclude voided from totals
   const empTotals = {};
-  txLog.forEach(t=>{
+  txLog.filter(t=>(t.status||'done')==='done').forEach(t=>{
     if (!empTotals[t.emp]) empTotals[t.emp] = { name:t.emp, color:t.empColor, initials:t.empInitials, count:0, total:0 };
     empTotals[t.emp].count++;
     empTotals[t.emp].total += t.total;
@@ -3571,18 +3660,37 @@ window.renderTxLog = function() {
     </div>`).join('');
 
   // Transaction rows (expandable)
+  const canVoid = currentUser.role === 'Admin' || currentUser.role === 'Manager';
+
   document.getElementById('txlog-tbody').innerHTML = filtered.map((t,i)=>{
+    const isVoided = t.status === 'voided';
     const discLabel = t.disc==='senior'?'<span class="chip chip-blue">Senior 20%</span>':t.disc==='pwd'?'<span class="chip chip-amber">PWD 20%</span>':t.disc==='manager'?`<span class="chip" style="background:#F5F0FF;color:#6B21A8">🏷 Manager ${t.mgrPct||''}%</span>`:'—';
-    const payLabel = t.pay==='cash'?'💵 Cash':t.pay==='gcash'?'📱 GCash':'💳 Maya';
+    const payLabel  = t.pay==='cash'?'💵 Cash':t.pay==='gcash'?'📱 GCash':'💳 Maya';
     const pharmacistCell = t.pharmacist
       ? `<span style="font-size:12px;font-weight:500;color:var(--slate600)">${t.pharmacist}</span>`
       : `<span style="color:var(--slate300);font-size:11px">—</span>`;
+    const totalCell = isVoided
+      ? `<span class="void-strike td-mono">${pesos(t.total)}</span>`
+      : `<span class="td-mono" style="font-weight:800;color:var(--g600)">${pesos(t.total)}</span>`;
+    const statusBadge = isVoided
+      ? `<span class="chip chip-red" style="font-size:10px">↩ Voided</span>`
+      : `<span class="chip chip-green" style="font-size:10px">✓ Done</span>`;
+    const rowClass = `tx-row-clickable${isVoided?' tx-row-voided':''}`;
     const itemLines = t.items.map(it=>`
       <div class="txlog-item-line">
         <span>${it.name} ×${it.qty}</span>
         <span style="font-family:var(--font-mono);font-weight:600">${pesos(it.price*it.qty)}</span>
       </div>`).join('');
-    return `<tr class="tx-row-clickable" onclick="toggleTxRow('txexp-${i}', this)">
+    const voidSection = isVoided
+      ? `<div style="margin-top:8px;padding:8px 10px;background:var(--red-bg);border-radius:var(--r-sm);font-size:12px;color:var(--red)">
+          <strong>Voided by ${t.voidedBy}</strong> · ${t.voidedAt}<br>Reason: ${t.voidReason}
+         </div>`
+      : canVoid
+        ? `<div style="margin-top:10px">
+             <button onclick="openVoid('${t.txNum}')" style="padding:7px 14px;border:1.5px solid var(--red);border-radius:var(--r-sm);background:white;color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer">↩️ Void this transaction</button>
+           </div>`
+        : '';
+    return `<tr class="${rowClass}" onclick="toggleTxRow('txexp-${i}', this)">
         <td style="color:var(--slate300);font-size:12px" id="txarrow-${i}">▶</td>
         <td class="td-mono" style="font-weight:700">${t.txNum}</td>
         <td>
@@ -3596,18 +3704,20 @@ window.renderTxLog = function() {
         <td style="color:var(--slate500)">${t.items.length} item${t.items.length!==1?'s':''}</td>
         <td>${discLabel}</td>
         <td style="font-size:12px">${payLabel}</td>
-        <td class="td-mono" style="font-weight:800;color:var(--g600)">${pesos(t.total)}</td>
+        <td>${totalCell}</td>
+        <td>${statusBadge}</td>
       </tr>
       <tr class="txlog-expand-row" id="txexp-${i}" style="display:none">
-        <td colspan="9">
+        <td colspan="10">
           <div class="txlog-items-list">
             ${itemLines}
             ${t.disc!=='none'?`<div class="txlog-item-line" style="color:var(--blue);margin-top:4px"><span>${t.disc==='senior'?'Senior Citizen':'PWD'} Discount (20%)</span><span style="font-family:var(--font-mono);font-weight:700">−${pesos(t.discAmt)}</span></div>`:''}
             <div class="txlog-item-line" style="font-weight:800;color:var(--slate900);border-top:1px solid var(--slate200);padding-top:4px;margin-top:4px"><span>Total</span><span style="font-family:var(--font-mono)">${pesos(t.total)}</span></div>
+            ${voidSection}
           </div>
         </td>
       </tr>`;
-  }).join('') || `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--slate400)">No transactions found</td></tr>`;
+  }).join('') || `<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--slate400)">No transactions found</td></tr>`;
 };
 
 window.toggleTxRow = function(expandId, row) {
