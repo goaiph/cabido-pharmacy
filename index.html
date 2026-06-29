@@ -487,7 +487,8 @@ input, select, button, textarea { font-family: var(--font-body); }
 }
 .prod-card:hover { border-color: var(--g400); box-shadow: var(--shadow); transform: translateY(-1px); }
 .prod-card:active { transform: scale(.97); }
-.prod-card.oos { opacity: .5; cursor: not-allowed; }
+.prod-card.oos { border-color: var(--amber); }
+.prod-card.oos:hover { border-color: #F59E0B; box-shadow: 0 4px 12px rgba(245,158,11,.2); }
 .prod-card-name {
   font-family: var(--font-display);
   font-size: 13px; font-weight: 700; color: var(--slate900); margin-bottom: 2px; line-height: 1.3;
@@ -558,10 +559,25 @@ input, select, button, textarea { font-family: var(--font-body); }
   color: var(--g600); transition: all .12s;
 }
 .qty-btn:hover { background: var(--g600); color: var(--white); border-color: var(--g600); }
-.qty-num { font-family: var(--font-mono); font-size: 13px; font-weight: 700; min-width: 18px; text-align: center; }
+.qty-num {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  width: 36px; text-align: center; border: 1.5px solid var(--slate200);
+  border-radius: var(--r-sm); padding: 3px 4px; outline: none;
+  background: var(--white); color: var(--slate900);
+  -moz-appearance: textfield;
+}
+.qty-num::-webkit-outer-spin-button,
+.qty-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty-num:focus { border-color: #9DCF46; box-shadow: 0 0 0 2px rgba(157,207,70,.2); }
 .cart-item-price { font-family: var(--font-mono); font-size: 12px; font-weight: 700; flex-shrink: 0; }
 .cart-item-del { color: var(--slate300); cursor: pointer; font-size: 13px; padding: 2px; flex-shrink: 0; }
 .cart-item-del:hover { color: var(--red); }
+.backorder-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  color: #92400E; background: var(--amber-bg); border: 1px solid #FDE68A;
+  padding: 2px 6px; border-radius: 4px; margin-top: 2px;
+}
 
 .order-foot { padding: 10px 14px; border-top: 1px solid var(--slate100); flex-shrink: 0; }
 .order-total-row {
@@ -596,12 +612,42 @@ input, select, button, textarea { font-family: var(--font-body); }
 .disc-pill.sel-none  { border-color: var(--slate400); background: var(--slate200); color: var(--slate700); }
 .disc-pill.sel-senior { border-color: var(--blue);  background: var(--blue-bg); color: var(--blue-dark); }
 .disc-pill.sel-pwd   { border-color: var(--amber); background: var(--amber-bg); color: #92400E; }
+.disc-pill.sel-mgr   { border-color: #9333EA; background: #F5F0FF; color: #6B21A8; }
+
+/* Manager discount pct input row */
+.mgr-disc-row {
+  display: none; align-items: center; gap: 8px;
+  margin-top: 8px; padding: 8px 10px;
+  background: #F5F0FF; border: 1.5px solid #9333EA33;
+  border-radius: var(--r-sm); animation: fadeIn .15s ease;
+}
+.mgr-disc-row.show { display: flex; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+.mgr-disc-label { font-size: 12px; font-weight: 700; color: #6B21A8; white-space: nowrap; }
+.mgr-disc-input {
+  width: 60px; padding: 5px 8px; border: 1.5px solid #9333EA66;
+  border-radius: var(--r-sm); font-family: var(--font-mono);
+  font-size: 15px; font-weight: 800; color: #6B21A8; text-align: center;
+  background: white; outline: none;
+  -moz-appearance: textfield;
+}
+.mgr-disc-input::-webkit-outer-spin-button,
+.mgr-disc-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.mgr-disc-input:focus { border-color: #9333EA; box-shadow: 0 0 0 3px #9333EA22; }
+.mgr-disc-pct-label { font-size: 14px; font-weight: 800; color: #9333EA; }
+.mgr-disc-apply {
+  margin-left: auto; padding: 5px 12px; border: none; border-radius: var(--r-sm);
+  background: #9333EA; color: white; font-family: var(--font-body);
+  font-size: 12px; font-weight: 700; cursor: pointer; transition: background .15s;
+}
+.mgr-disc-apply:hover { background: #7C3AED; }
 
 /* order summary breakdown */
 .order-summary { margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px; }
 .order-summary-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--slate500); }
 .order-summary-row.disc-line { color: var(--blue-dark); font-weight: 600; }
 .order-summary-row.disc-line.pwd-line { color: #92400E; }
+.order-summary-row.disc-line.mgr-line { color: #6B21A8; }
 .order-summary-row.total-line {
   font-family: var(--font-display); font-size: 16px; font-weight: 800;
   color: var(--slate900); padding-top: 6px;
@@ -699,6 +745,59 @@ input, select, button, textarea { font-family: var(--font-body); }
 .emp-btn.brk { background: var(--amber-bg); color: #92400E; }
 .emp-btn.ended { background: var(--slate100); color: var(--slate400); cursor: default; }
 .emp-btn.full { grid-column: 1 / -1; }
+
+/* Admin edit-time button on employee card */
+.emp-edit-time-btn {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  width: 100%; margin-top: 6px; padding: 7px;
+  background: transparent; border: 1.5px dashed var(--slate300);
+  border-radius: var(--r-sm); font-family: var(--font-body);
+  font-size: 11px; font-weight: 700; color: var(--slate400);
+  cursor: pointer; transition: all .15s;
+}
+.emp-edit-time-btn:hover { border-color: #52C3E3; color: #1E6F8F; background: #EEF9FD; }
+
+/* Admin edit hint on shift log rows */
+.shift-log-row:hover td { background: #EEF9FD; }
+.shift-log-edit-hint {
+  font-size: 11px; opacity: 0; margin-left: 4px;
+  transition: opacity .15s;
+}
+.shift-log-row:hover .shift-log-edit-hint { opacity: 1; }
+
+/* Edit time modal */
+.edit-time-emp-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--slate100);
+  border-radius: var(--r-sm); margin-bottom: 18px;
+}
+.edit-time-av {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 13px; font-weight: 800; color: white;
+}
+.edit-time-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+.edit-time-role { font-size: 11px; color: var(--slate400); }
+
+.time-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+.time-field { display: flex; flex-direction: column; gap: 4px; }
+.time-field label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .7px; color: var(--slate500);
+}
+.time-field input[type="time"] {
+  padding: 10px 12px; border: 1.5px solid var(--slate200);
+  border-radius: var(--r-sm); font-family: var(--font-mono);
+  font-size: 15px; font-weight: 600; color: var(--slate900);
+  background: var(--slate100); outline: none; transition: border-color .15s;
+}
+.time-field input[type="time"]:focus { border-color: #52C3E3; background: white; box-shadow: 0 0 0 3px rgba(82,195,227,.12); }
+.time-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.time-admin-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: #1E6F8F;
+  background: #D9F3FA; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px;
+}
 
 /* ═══════════════════════════════════════════
    REPORTS
@@ -1064,6 +1163,146 @@ input, select, button, textarea { font-family: var(--font-body); }
   margin-top: 20px; text-align: center; font-size: 11px; color: rgba(255,255,255,.2);
 }
 
+
+/* ═══════════════════════════════════════════
+   QUEUE PAGE
+═══════════════════════════════════════════ */
+.queue-header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+}
+.queue-counter {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  color: var(--slate400); background: var(--slate100);
+  padding: 4px 12px; border-radius: 20px;
+}
+.queue-list { display: flex; flex-direction: column; gap: 12px; }
+.queue-card {
+  background: var(--white); border-radius: var(--r-lg);
+  border: 1px solid var(--slate200); box-shadow: var(--shadow-sm);
+  overflow: hidden; transition: box-shadow .15s;
+}
+.queue-card:hover { box-shadow: var(--shadow); }
+.queue-card-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--slate100);
+}
+.queue-order-num {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 800;
+  color: var(--white); background: var(--g600);
+  padding: 4px 10px; border-radius: var(--r-sm); flex-shrink: 0;
+}
+.queue-card-meta { flex: 1; min-width: 0; }
+.queue-pharmacist {
+  font-size: 13px; font-weight: 700; color: var(--slate900);
+  display: flex; align-items: center; gap: 6px;
+}
+.queue-pharmacist-av {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 800; color: white; flex-shrink: 0;
+}
+.queue-time { font-size: 11px; color: var(--slate400); font-family: var(--font-mono); margin-top: 1px; }
+.queue-total {
+  font-family: var(--font-mono); font-size: 18px; font-weight: 800;
+  color: var(--g600); flex-shrink: 0;
+}
+.queue-card-body { padding: 10px 16px; display: flex; flex-direction: column; gap: 4px; }
+.queue-item-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--slate600); padding: 3px 0;
+}
+.queue-item-name { flex: 1; }
+.queue-item-qty { font-family: var(--font-mono); color: var(--slate400); margin: 0 10px; }
+.queue-item-price { font-family: var(--font-mono); font-weight: 700; color: var(--slate900); }
+.queue-disc-row {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--blue-dark); font-weight: 700;
+  padding: 4px 0; border-top: 1px dashed var(--slate200); margin-top: 4px;
+}
+.queue-card-foot {
+  padding: 10px 16px; background: var(--slate100);
+  display: flex; align-items: center; gap: 8px;
+}
+.queue-process-btn {
+  flex: 1; padding: 11px; border: none; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, #9DCF46 0%, #7bbf2e 100%);
+  color: #1a2e04; font-family: var(--font-display); font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: all .15s;
+  box-shadow: 0 2px 8px rgba(157,207,70,.3);
+}
+.queue-process-btn:hover { box-shadow: 0 4px 14px rgba(157,207,70,.45); transform: translateY(-1px); }
+.queue-cancel-btn {
+  padding: 11px 14px; border: 1.5px solid var(--slate300); border-radius: var(--r-sm);
+  background: white; color: var(--slate500);
+  font-family: var(--font-body); font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all .15s;
+}
+.queue-cancel-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.queue-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--slate300); display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.queue-empty-icon { font-size: 48px; opacity: .4; }
+.queue-empty-text { font-size: 14px; font-weight: 600; color: var(--slate400); }
+.queue-empty-sub { font-size: 12px; color: var(--slate300); }
+
+/* Queue badge on nav */
+.queue-nav-badge {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px;
+  background: #52C3E3; color: white;
+}
+
+/* Order summary modal */
+.os-items { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.os-item-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; background: var(--slate100); border-radius: var(--r-sm);
+}
+.os-item-name { flex: 1; font-size: 13px; font-weight: 600; }
+.os-item-qty {
+  font-family: var(--font-mono); font-size: 12px; color: var(--slate400);
+  background: white; border: 1px solid var(--slate200);
+  padding: 2px 8px; border-radius: 4px; min-width: 36px; text-align: center;
+}
+.os-item-price { font-family: var(--font-mono); font-size: 13px; font-weight: 700; }
+.os-summary-block {
+  background: var(--g50); border: 1px solid var(--g200);
+  border-radius: var(--r-sm); padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px;
+}
+.os-summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--slate600); }
+.os-summary-row.os-total {
+  font-family: var(--font-display); font-size: 16px; font-weight: 800;
+  color: var(--slate900); padding-top: 6px;
+  border-top: 1.5px solid var(--g200); margin-top: 2px;
+}
+.os-summary-row.os-total span:last-child { color: var(--g600); font-family: var(--font-mono); }
+.os-disc-row { color: var(--blue-dark); font-weight: 700; }
+
+/* Cashier process modal — editable order */
+.cp-item-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; background: var(--slate100);
+  border-radius: var(--r-sm); margin-bottom: 6px;
+}
+.cp-item-name { flex: 1; font-size: 13px; font-weight: 600; }
+.cp-item-batch { font-family: var(--font-mono); font-size: 9px; color: var(--slate400); display: block; margin-top: 1px; }
+.cp-qty-ctrl { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.cp-qty-input {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  width: 36px; text-align: center; border: 1.5px solid var(--slate200);
+  border-radius: var(--r-sm); padding: 3px 4px; outline: none; background: white;
+  -moz-appearance: textfield;
+}
+.cp-qty-input::-webkit-outer-spin-button,
+.cp-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.cp-qty-input:focus { border-color: #9DCF46; }
+.cp-item-price { font-family: var(--font-mono); font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.cp-del { color: var(--slate300); cursor: pointer; font-size: 13px; padding: 2px; flex-shrink: 0; }
+.cp-del:hover { color: var(--red); }
+
 /* ═══════════════════════════════════════════
    TRANSACTION LOG PAGE
 ═══════════════════════════════════════════ */
@@ -1104,6 +1343,127 @@ input, select, button, textarea { font-family: var(--font-body); }
 .tx-row-clickable { cursor: pointer; }
 .tx-row-clickable:hover td { background: var(--slate100) !important; }
 
+.tx-row-clickable:hover td { background: var(--slate100) !important; }
+
+/* ═══════════════════════════════════════════
+   SALES SUMMARY PAGE
+═══════════════════════════════════════════ */
+.ss-period-bar {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.ss-period-btn {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  border: 2px solid var(--slate200); background: var(--white); color: var(--slate500);
+  cursor: pointer; transition: all .15s;
+}
+.ss-period-btn.active { border-color: #9DCF46; background: var(--g100); color: var(--g700); }
+.ss-export-btn {
+  margin-left: auto; padding: 7px 14px; border-radius: var(--r-sm);
+  background: var(--white); border: 1.5px solid var(--slate200);
+  font-size: 12px; font-weight: 700; color: var(--slate500); cursor: pointer;
+  font-family: var(--font-body); transition: all .15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.ss-export-btn:hover { border-color: #9DCF46; color: var(--g700); background: var(--g100); }
+
+/* Hero metric band */
+.ss-hero { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+.ss-hero-card {
+  border-radius: var(--r-lg); padding: 18px 16px; position: relative; overflow: hidden;
+}
+.ss-hero-card.gross { background: linear-gradient(135deg, var(--g700) 0%, var(--g600) 100%); color: white; }
+.ss-hero-card.net   { background: linear-gradient(135deg, #1E6F8F 0%, #52C3E3 100%); color: white; }
+.ss-hero-card.profit { background: linear-gradient(135deg, #7C3AED 0%, #9333EA 100%); color: white; }
+.ss-hero-card.refund { background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%); color: white; }
+.ss-hero-label { font-size: 11px; font-weight: 700; opacity: .7; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+.ss-hero-value { font-family: var(--font-display); font-size: 22px; font-weight: 800; line-height: 1; }
+.ss-hero-sub { font-size: 11px; opacity: .65; margin-top: 4px; }
+.ss-hero-icon { position: absolute; right: 14px; top: 14px; font-size: 28px; opacity: .2; }
+
+/* Breakdown section */
+.ss-section { margin-bottom: 20px; }
+.ss-section-title {
+  font-family: var(--font-display); font-size: 14px; font-weight: 800;
+  color: var(--slate900); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ss-section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--slate200);
+}
+
+/* Metric breakdown rows */
+.ss-breakdown { background: var(--white); border-radius: var(--r-lg); border: 1px solid var(--slate200); overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+.ss-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-bottom: 1px solid var(--slate100);
+}
+.ss-row:last-child { border-bottom: none; }
+.ss-row-label { font-size: 13px; color: var(--slate700); display: flex; align-items: center; gap: 8px; }
+.ss-row-icon { font-size: 16px; width: 28px; height: 28px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ss-row-value { font-family: var(--font-mono); font-size: 14px; font-weight: 800; }
+.ss-row-value.green { color: var(--g600); }
+.ss-row-value.red   { color: var(--red); }
+.ss-row-value.blue  { color: #1E6F8F; }
+.ss-row-value.purple { color: #7C3AED; }
+.ss-row-value.amber { color: var(--amber); }
+.ss-row-value.slate { color: var(--slate500); }
+.ss-row.total-row { background: var(--slate100); }
+.ss-row.total-row .ss-row-label { font-weight: 800; color: var(--slate900); }
+.ss-row.total-row .ss-row-value { font-size: 16px; }
+
+/* Payment breakdown chart bar */
+.pay-bar-wrap { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; }
+.pay-bar-row { display: flex; align-items: center; gap: 10px; }
+.pay-bar-label { font-size: 12px; font-weight: 600; color: var(--slate600); width: 52px; flex-shrink: 0; }
+.pay-bar-track { flex: 1; height: 10px; background: var(--slate100); border-radius: 5px; overflow: hidden; }
+.pay-bar-fill { height: 100%; border-radius: 5px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.pay-bar-amt { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--slate600); width: 62px; text-align: right; flex-shrink: 0; }
+.pay-bar-pct { font-size: 10px; font-weight: 700; color: var(--slate400); width: 30px; text-align: right; flex-shrink: 0; }
+
+/* Top products table */
+.top-prod-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-bottom: 1px solid var(--slate100);
+}
+.top-prod-row:last-child { border-bottom: none; }
+.top-prod-rank { font-family: var(--font-mono); font-size: 11px; font-weight: 800; color: var(--slate300); width: 18px; flex-shrink: 0; }
+.top-prod-rank.gold { color: #F59E0B; }
+.top-prod-rank.silver { color: #94A3B8; }
+.top-prod-rank.bronze { color: #92400E; }
+.top-prod-name { flex: 1; font-size: 13px; font-weight: 600; }
+.top-prod-cat { font-size: 10px; color: var(--slate400); margin-top: 1px; }
+.top-prod-qty { font-family: var(--font-mono); font-size: 12px; color: var(--slate400); width: 44px; text-align: center; flex-shrink: 0; }
+.top-prod-rev { font-family: var(--font-mono); font-size: 13px; font-weight: 800; color: var(--g600); flex-shrink: 0; }
+
+/* Cashier performance */
+.cashier-perf-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-bottom: 1px solid var(--slate100);
+}
+.cashier-perf-row:last-child { border-bottom: none; }
+.cashier-av {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 11px; font-weight: 800; color: white;
+}
+.cashier-perf-info { flex: 1; min-width: 0; }
+.cashier-perf-name { font-size: 13px; font-weight: 700; }
+.cashier-perf-sub { font-size: 11px; color: var(--slate400); }
+.cashier-perf-stats { text-align: right; flex-shrink: 0; }
+.cashier-perf-total { font-family: var(--font-mono); font-size: 14px; font-weight: 800; color: var(--g600); }
+.cashier-perf-txcount { font-size: 10px; color: var(--slate400); }
+
+/* Disc breakdown */
+.disc-breakdown-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+.disc-mini-card {
+  background: var(--white); border-radius: var(--r); border: 1px solid var(--slate200);
+  padding: 12px 14px; box-shadow: var(--shadow-sm); text-align: center;
+}
+.disc-mini-icon { font-size: 20px; margin-bottom: 4px; }
+.disc-mini-label { font-size: 10px; font-weight: 700; color: var(--slate400); text-transform: uppercase; letter-spacing: .5px; }
+.disc-mini-amt { font-family: var(--font-mono); font-size: 16px; font-weight: 800; color: var(--red); margin: 2px 0; }
+.disc-mini-count { font-size: 11px; color: var(--slate400); }
+
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
@@ -1113,6 +1473,8 @@ input, select, button, textarea { font-family: var(--font-body); }
   .product-grid { grid-template-columns: repeat(3, 1fr); }
   .emp-grid { grid-template-columns: repeat(2, 1fr); }
   .reports-grid { grid-template-columns: repeat(2, 1fr); }
+  .ss-hero { grid-template-columns: repeat(4, 1fr); }
+  .disc-breakdown-grid { grid-template-columns: repeat(3, 1fr); }
   .toast-stack { left: auto; }
   .overlay { align-items: center; padding: 20px; }
   .modal { border-radius: var(--r-xl); max-width: 460px; }
@@ -1258,6 +1620,10 @@ input, select, button, textarea { font-family: var(--font-body); }
         <div class="nav-link" data-page="pos" onclick="nav('pos',this)">
           <span class="nav-link-icon">🛒</span> Point of Sale
         </div>
+        <div class="nav-link" data-page="queue" onclick="nav('queue',this)">
+          <span class="nav-link-icon">🎫</span> Order Queue
+          <span class="queue-nav-badge" id="queue-nav-cnt" style="display:none">0</span>
+        </div>
       </div>
       <div class="nav-group">
         <div class="nav-group-label">Inventory</div>
@@ -1277,6 +1643,9 @@ input, select, button, textarea { font-family: var(--font-body); }
       </div>
       <div class="nav-group">
         <div class="nav-group-label">Reports</div>
+        <div class="nav-link" data-page="summary" onclick="nav('summary',this)">
+          <span class="nav-link-icon">💰</span> Sales Summary
+        </div>
         <div class="nav-link" data-page="txlog" onclick="nav('txlog',this)">
           <span class="nav-link-icon">🧾</span> Transaction Log
         </div>
@@ -1319,8 +1688,9 @@ input, select, button, textarea { font-family: var(--font-body); }
     <div class="bottom-nav-item" data-page="pos" onclick="nav('pos',this)">
       <span class="bn-icon">🛒</span><span>POS</span>
     </div>
-    <div class="bottom-nav-item" data-page="inventory" onclick="nav('inventory',this)">
-      <span class="bn-icon">📦</span><span>Stock</span>
+    <div class="bottom-nav-item" data-page="queue" onclick="nav('queue',this)">
+      <span class="bn-icon">🎫</span><span>Queue</span>
+      <span class="bn-badge" id="bn-queue-cnt" style="display:none">0</span>
     </div>
     <div class="bottom-nav-item" data-page="expiry" onclick="nav('expiry',this)">
       <span class="bn-icon">⏰</span><span>Expiry</span>
@@ -1339,8 +1709,8 @@ input, select, button, textarea { font-family: var(--font-body); }
       <div class="stats-row">
         <div class="stat-card s-green">
           <div class="stat-label">Today's Sales</div>
-          <div class="stat-value" id="d-sales">₱4,820</div>
-          <div class="stat-sub">23 transactions</div>
+          <div class="stat-value" id="d-sales">₱2,910</div>
+          <div class="stat-sub">7 transactions</div>
         </div>
         <div class="stat-card s-blue">
           <div class="stat-label">Items Sold</div>
@@ -1355,7 +1725,7 @@ input, select, button, textarea { font-family: var(--font-body); }
         <div class="stat-card s-red">
           <div class="stat-label">Expiring Soon</div>
           <div class="stat-value">3</div>
-          <div class="stat-sub">within 30 days</div>
+          <div class="stat-sub">within 6 months</div>
         </div>
       </div>
       <div class="dash-grid">
@@ -1388,10 +1758,10 @@ input, select, button, textarea { font-family: var(--font-body); }
             <div class="card-link" onclick="nav('reports')">All →</div>
           </div>
           <div class="tx-list" id="tx-list">
-            <div class="tx-row"><span class="tx-num">#TX-0023</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">3 items</span><span class="tx-amount">₱285</span></div>
-            <div class="tx-row"><span class="tx-num">#TX-0022</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">1 item</span><span class="tx-amount">₱48</span></div>
-            <div class="tx-row"><span class="tx-num">#TX-0021</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">5 items</span><span class="tx-amount">₱620</span></div>
-            <div class="tx-row"><span class="tx-num">#TX-0020</span><span class="tx-cashier">Rodel Cruz</span><span class="tx-count">2 items</span><span class="tx-amount">₱192</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0030</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">3 items</span><span class="tx-amount">₱960</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0029</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">2 items</span><span class="tx-amount">₱248</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0028</span><span class="tx-cashier">Lea Dimaculangan</span><span class="tx-count">2 items</span><span class="tx-amount">₱125</span></div>
+            <div class="tx-row"><span class="tx-num">#TX-0027</span><span class="tx-cashier">Ana Reyes</span><span class="tx-count">2 items</span><span class="tx-amount">₱276.80</span></div>
           </div>
         </div>
       </div>
@@ -1428,7 +1798,15 @@ input, select, button, textarea { font-family: var(--font-body); }
                 <div class="disc-pill sel-none" id="dp-none"   onclick="selDisc('none')">None</div>
                 <div class="disc-pill"          id="dp-senior" onclick="selDisc('senior')">👴 Senior</div>
                 <div class="disc-pill"          id="dp-pwd"    onclick="selDisc('pwd')">♿ PWD</div>
+                <div class="disc-pill"          id="dp-mgr"    onclick="selDisc('manager')" style="display:none">🏷 Manager</div>
               </div>
+            </div>
+            <!-- Manager discount pct input (only shown when manager pill selected) -->
+            <div class="mgr-disc-row" id="mgr-disc-row">
+              <span class="mgr-disc-label">Manager Discount</span>
+              <input class="mgr-disc-input" id="mgr-disc-pct" type="number" min="1" max="100" value="10" placeholder="0">
+              <span class="mgr-disc-pct-label">%</span>
+              <button class="mgr-disc-apply" onclick="applyMgrDisc()">Apply</button>
             </div>
             <!-- Summary breakdown -->
             <div class="order-summary" id="order-summary">
@@ -1439,13 +1817,10 @@ input, select, button, textarea { font-family: var(--font-body); }
               </div>
               <div class="order-summary-row total-line"><span>Total</span><span id="order-total">₱0.00</span></div>
             </div>
-            <!-- Payment methods -->
-            <div class="pay-methods">
-              <div class="pay-pill sel" id="pm-cash"  onclick="selPay('cash')">💵 Cash</div>
-              <div class="pay-pill"    id="pm-gcash" onclick="selPay('gcash')">📱 GCash</div>
-              <div class="pay-pill"    id="pm-maya"  onclick="selPay('maya')">💳 Maya</div>
-            </div>
-            <button class="charge-btn" id="charge-btn" onclick="openPayModal()">Charge ₱0.00</button>
+            <!-- Send to Queue -->
+            <button class="charge-btn" id="charge-btn" onclick="openOrderSummary()" style="background:linear-gradient(135deg,#52C3E3 0%,#2E97BE 100%);color:white;box-shadow:0 4px 14px rgba(82,195,227,.35)">
+              📋 Review &amp; Send to Queue
+            </button>
           </div>
         </div>
       </div>
@@ -1480,8 +1855,8 @@ input, select, button, textarea { font-family: var(--font-body); }
     <div class="page page-body" id="page-expiry">
       <div class="filter-pills">
         <div class="filter-pill f-all" onclick="setExpiryFilter('all',this)">All</div>
-        <div class="filter-pill" onclick="setExpiryFilter('crit',this)">🔴 Critical ≤30d</div>
-        <div class="filter-pill" onclick="setExpiryFilter('warn',this)">🟡 Warning ≤60d</div>
+        <div class="filter-pill" onclick="setExpiryFilter('crit',this)">🔴 Critical ≤6 months</div>
+        <div class="filter-pill" onclick="setExpiryFilter('warn',this)">🟡 Warning ≤9 months</div>
         <div class="filter-pill" onclick="setExpiryFilter('ok',this)">🟢 OK</div>
       </div>
       <div class="table-wrap">
@@ -1502,7 +1877,10 @@ input, select, button, textarea { font-family: var(--font-body); }
       </div>
       <div class="emp-grid" id="emp-grid"></div>
       <div class="card" style="overflow:hidden">
-        <div class="card-header" style="padding-bottom:10px"><div class="card-title">📋 Shift Log Today</div></div>
+        <div class="card-header" style="padding-bottom:10px">
+          <div class="card-title">📋 Shift Log Today</div>
+          <div id="shift-log-admin-hint" style="display:none;font-size:11px;color:#1E6F8F;font-weight:600">✏️ Click any row to edit times</div>
+        </div>
         <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
           <table class="data-table">
             <thead><tr><th>Name</th><th>Role</th><th>Time In</th><th>Break</th><th>Time Out</th><th>Hours</th></tr></thead>
@@ -1513,7 +1891,41 @@ input, select, button, textarea { font-family: var(--font-body); }
     </div>
 
     <!-- ── REPORTS ── -->
-    <div class="page page-body" id="page-reports">
+    <!-- ── SALES SUMMARY ── -->
+    <div class="page page-body" id="page-summary">
+      <!-- Period selector -->
+      <div class="ss-period-bar">
+        <button class="ss-period-btn" onclick="setSsPeriod('today',this)">Today</button>
+        <button class="ss-period-btn" onclick="setSsPeriod('week',this)">This Week</button>
+        <button class="ss-period-btn active" onclick="setSsPeriod('month',this)">This Month</button>
+        <button class="ss-period-btn" onclick="setSsPeriod('all',this)">All Time</button>
+        <button class="ss-export-btn" onclick="toast('Sales Summary exported to Excel','success')">📥 Export</button>
+      </div>
+      <!-- Hero metrics -->
+      <div class="ss-hero" id="ss-hero"></div>
+      <!-- P&L breakdown -->
+      <div class="ss-section-title">📊 Income Breakdown</div>
+      <div class="ss-breakdown" id="ss-breakdown"></div>
+      <!-- Discount breakdown -->
+      <div class="ss-section-title">🏷 Discounts Given</div>
+      <div class="disc-breakdown-grid" id="ss-disc-grid"></div>
+      <!-- Payment method breakdown -->
+      <div class="ss-section-title">💳 Payment Methods</div>
+      <div class="ss-breakdown" id="ss-pay-breakdown">
+        <div class="pay-bar-wrap" id="ss-pay-bars"></div>
+      </div>
+      <!-- Top selling products -->
+      <div class="ss-section-title">🏆 Top Selling Products</div>
+      <div class="ss-breakdown" id="ss-top-products"></div>
+      <!-- Cashier performance -->
+      <div class="ss-section-title">👤 Cashier Performance</div>
+      <div class="ss-breakdown" id="ss-cashier-perf"></div>
+      <!-- Pharmacist performance -->
+      <div class="ss-section-title">💊 Pharmacist Performance</div>
+      <div class="ss-breakdown" id="ss-pharmacist-perf"></div>
+    </div>
+
+    <!-- ── REPORTS ── -->
       <div class="sync-alert" id="sync-alert" style="display:none">
         <span style="font-size:20px">⚠️</span>
         <div class="sync-alert-text"><strong id="sync-count">3</strong> offline transactions pending sync.</div>
@@ -1523,7 +1935,7 @@ input, select, button, textarea { font-family: var(--font-body); }
         <div class="report-card">
           <div class="report-card-head"><div class="report-icon ri-green">📊</div><div class="report-card-info"><div class="r-title">Daily Sales</div><div class="r-desc">All transactions today</div></div></div>
           <div class="report-stat-val" id="r-sales">₱4,820</div>
-          <div class="report-stat-lbl">23 transactions · avg ₱209</div>
+          <div class="report-stat-lbl">7 transactions today · avg ₱416</div>
           <button class="export-btn" onclick="toast('Sales exported to Excel','success')">📥 Export to Excel</button>
         </div>
         <div class="report-card">
@@ -1539,10 +1951,28 @@ input, select, button, textarea { font-family: var(--font-body); }
           <button class="export-btn" onclick="toast('Employee report exported','success')">📥 Export to Excel</button>
         </div>
         <div class="report-card">
-          <div class="report-card-head"><div class="report-icon ri-red">⏰</div><div class="report-card-info"><div class="r-title">Expiration</div><div class="r-desc">Batches expiring in 90d</div></div></div>
+          <div class="report-card-head"><div class="report-icon ri-red">⏰</div><div class="report-card-info"><div class="r-title">Expiration</div><div class="r-desc">Batches expiring within 9 months</div></div></div>
           <div class="report-stat-val">8</div>
           <div class="report-stat-lbl">3 critical · ₱12,400 at risk</div>
           <button class="export-btn" onclick="toast('Expiration report exported','success')">📥 Export to Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── QUEUE ── -->
+    <div class="page page-body" id="page-queue">
+      <div class="queue-header-row">
+        <div>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:800">Order Queue</div>
+          <div style="font-size:12px;color:var(--slate400);margin-top:2px">Orders waiting for cashier processing</div>
+        </div>
+        <div class="queue-counter" id="queue-counter">0 pending</div>
+      </div>
+      <div id="queue-list" class="queue-list">
+        <div class="queue-empty">
+          <div class="queue-empty-icon">🎫</div>
+          <div class="queue-empty-text">No orders in queue</div>
+          <div class="queue-empty-sub">Pharmacist orders will appear here</div>
         </div>
       </div>
     </div>
@@ -1571,7 +2001,8 @@ input, select, button, textarea { font-family: var(--font-body); }
             <tr>
               <th></th>
               <th>TX #</th>
-              <th>Employee</th>
+              <th>Cashier</th>
+              <th>Pharmacist</th>
               <th>Time</th>
               <th>Items</th>
               <th>Discount</th>
@@ -1691,6 +2122,107 @@ input, select, button, textarea { font-family: var(--font-body); }
   </div>
 </div>
 
+<!-- Edit Employee Time (Admin only) -->
+<div class="overlay" id="ov-edit-time">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="time-admin-badge">🔐 Admin Override</div>
+    <div class="modal-title">Edit Shift Times</div>
+    <div class="modal-sub">Adjust recorded times for this employee</div>
+    <div class="edit-time-emp-row">
+      <div class="edit-time-av" id="et-av" style="background:#2196A8">AR</div>
+      <div>
+        <div class="edit-time-name" id="et-name">Ana Reyes</div>
+        <div class="edit-time-role" id="et-role">Cashier</div>
+      </div>
+    </div>
+    <div class="time-fields">
+      <div class="time-field-row">
+        <div class="time-field">
+          <label>Time In</label>
+          <input type="time" id="et-timein">
+        </div>
+        <div class="time-field">
+          <label>Time Out</label>
+          <input type="time" id="et-timeout">
+        </div>
+      </div>
+      <div class="time-field-row">
+        <div class="time-field">
+          <label>Break Start</label>
+          <input type="time" id="et-breakout">
+        </div>
+        <div class="time-field">
+          <label>Break End</label>
+          <input type="time" id="et-breakin">
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeOverlay('ov-edit-time')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditTime()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Summary modal (Pharmacist reviews before queuing) -->
+<div class="overlay" id="ov-order-summary">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Order Summary</div>
+    <div class="modal-sub">Review before sending to cashier queue</div>
+    <div class="os-items" id="os-items"></div>
+    <div class="os-summary-block">
+      <div class="os-summary-row"><span>Subtotal</span><span id="os-subtotal">₱0.00</span></div>
+      <div class="os-summary-row os-disc-row" id="os-disc-row" style="display:none">
+        <span id="os-disc-label">Senior Discount (20%)</span>
+        <span id="os-disc-amt">−₱0.00</span>
+      </div>
+      <div class="os-summary-row os-total"><span>Total</span><span id="os-total">₱0.00</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeOverlay('ov-order-summary')">Edit Order</button>
+      <button class="btn btn-primary" onclick="openCpvForQueue()" style="background:linear-gradient(135deg,#52C3E3 0%,#2E97BE 100%);color:white;box-shadow:0 3px 10px rgba(82,195,227,.3)">
+        Send to Queue →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Cashier Process modal (Cashier edits + pays) -->
+<div class="overlay" id="ov-cashier-process">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div>
+        <div class="modal-title" id="cp-order-num">Order #Q-001</div>
+        <div style="font-size:12px;color:var(--slate400)" id="cp-pharmacist-line">By Rodel Cruz · 2 mins ago</div>
+      </div>
+      <div id="cp-disc-chip" style="margin-left:auto;display:none"></div>
+    </div>
+    <!-- Editable items -->
+    <div id="cp-items"></div>
+    <!-- Summary -->
+    <div class="os-summary-block" style="margin-bottom:12px">
+      <div class="os-summary-row"><span>Subtotal</span><span id="cp-subtotal">₱0.00</span></div>
+      <div class="os-summary-row os-disc-row" id="cp-disc-row" style="display:none">
+        <span id="cp-disc-label">Discount</span><span id="cp-disc-amt">−₱0.00</span>
+      </div>
+      <div class="os-summary-row os-total"><span>Total</span><span id="cp-total">₱0.00</span></div>
+    </div>
+    <!-- Payment methods -->
+    <div class="pay-methods" style="margin-bottom:10px">
+      <div class="pay-pill sel" id="cp-pm-cash"  onclick="cpSelPay('cash')">💵 Cash</div>
+      <div class="pay-pill"    id="cp-pm-gcash" onclick="cpSelPay('gcash')">📱 GCash</div>
+      <div class="pay-pill"    id="cp-pm-maya"  onclick="cpSelPay('maya')">💳 Maya</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeOverlay('ov-cashier-process')">Cancel</button>
+      <button class="btn btn-primary" onclick="openCpvForCashier()" id="cp-charge-btn">Charge ₱0.00</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast stack -->
 <div class="toast-stack" id="toast-stack"></div>
 
@@ -1700,29 +2232,29 @@ input, select, button, textarea { font-family: var(--font-body); }
 
 /* ── DATA ────────────────────────────────── */
 const PRODUCTS = [
-  { id:1, name:'Amoxicillin 500mg', generic:'Amoxicillin', cat:'Antibiotics', price:12, unit:'tab',
+  { id:1, name:'Amoxicillin 500mg', generic:'Amoxicillin', cat:'Antibiotics', price:12, cost:7.50, unit:'tab',
     batches:[{id:'B-024',exp:'2026-07-07',qty:48},{id:'B-031',exp:'2026-10-15',qty:120}] },
-  { id:2, name:'Mefenamic Acid 500mg', generic:'Mefenamic Acid', cat:'Analgesics', price:8.50, unit:'cap',
+  { id:2, name:'Mefenamic Acid 500mg', generic:'Mefenamic Acid', cat:'Analgesics', price:8.50, cost:5.00, unit:'cap',
     batches:[{id:'B-019',exp:'2026-07-19',qty:72},{id:'B-027',exp:'2026-12-01',qty:200}] },
-  { id:3, name:'Cetirizine 10mg', generic:'Cetirizine HCl', cat:'Antihistamines', price:9, unit:'tab',
+  { id:3, name:'Cetirizine 10mg', generic:'Cetirizine HCl', cat:'Antihistamines', price:9, cost:5.50, unit:'tab',
     batches:[{id:'B-031',exp:'2026-07-24',qty:60},{id:'B-040',exp:'2027-01-10',qty:150}] },
-  { id:4, name:'Paracetamol 500mg', generic:'Paracetamol', cat:'Analgesics', price:4, unit:'tab',
+  { id:4, name:'Paracetamol 500mg', generic:'Paracetamol', cat:'Analgesics', price:4, cost:2.00, unit:'tab',
     batches:[{id:'B-041',exp:'2027-03-20',qty:500}] },
-  { id:5, name:'Losartan 50mg', generic:'Losartan Potassium', cat:'Maintenance', price:18, unit:'tab',
+  { id:5, name:'Losartan 50mg', generic:'Losartan Potassium', cat:'Maintenance', price:18, cost:11.00, unit:'tab',
     batches:[{id:'B-037',exp:'2027-02-10',qty:90}] },
-  { id:6, name:'Metformin 500mg', generic:'Metformin HCl', cat:'Maintenance', price:7, unit:'tab',
+  { id:6, name:'Metformin 500mg', generic:'Metformin HCl', cat:'Maintenance', price:7, cost:4.00, unit:'tab',
     batches:[{id:'B-038',exp:'2027-05-01',qty:180}] },
-  { id:7, name:'Amlodipine 5mg', generic:'Amlodipine Besylate', cat:'Maintenance', price:15, unit:'tab',
+  { id:7, name:'Amlodipine 5mg', generic:'Amlodipine Besylate', cat:'Maintenance', price:15, cost:9.00, unit:'tab',
     batches:[{id:'B-033',exp:'2026-09-30',qty:5}] },
-  { id:8, name:'Ascorbic Acid 500mg', generic:'Vitamin C', cat:'Vitamins', price:5, unit:'tab',
+  { id:8, name:'Ascorbic Acid 500mg', generic:'Vitamin C', cat:'Vitamins', price:5, cost:2.50, unit:'tab',
     batches:[{id:'B-042',exp:'2027-06-15',qty:300}] },
-  { id:9, name:'Biogesic 500mg', generic:'Paracetamol', cat:'Analgesics', price:6.50, unit:'tab',
+  { id:9, name:'Biogesic 500mg', generic:'Paracetamol', cat:'Analgesics', price:6.50, cost:3.50, unit:'tab',
     batches:[{id:'B-043',exp:'2027-04-10',qty:240}] },
-  { id:10, name:'Cloxacillin 500mg', generic:'Cloxacillin Na', cat:'Antibiotics', price:22, unit:'cap',
+  { id:10, name:'Cloxacillin 500mg', generic:'Cloxacillin Na', cat:'Antibiotics', price:22, cost:14.00, unit:'cap',
     batches:[{id:'B-030',exp:'2026-11-20',qty:0}] },
-  { id:11, name:'Omeprazole 20mg', generic:'Omeprazole', cat:'GI', price:14, unit:'cap',
+  { id:11, name:'Omeprazole 20mg', generic:'Omeprazole', cat:'GI', price:14, cost:8.50, unit:'cap',
     batches:[{id:'B-044',exp:'2027-02-28',qty:80}] },
-  { id:12, name:'Salbutamol 2mg', generic:'Salbutamol Sulfate', cat:'Respiratory', price:3.50, unit:'tab',
+  { id:12, name:'Salbutamol 2mg', generic:'Salbutamol Sulfate', cat:'Respiratory', price:3.50, cost:2.00, unit:'tab',
     batches:[{id:'B-039',exp:'2026-10-05',qty:12}] },
 ];
 
@@ -1740,8 +2272,9 @@ let currentUser = { name:'Ana Reyes', role:'Cashier', initials:'AR', color:'#219
 let cart = [];
 let payMethod = 'cash';
 let discType = 'none';
-let txCounter = 24;
-let totalSales = 4820;
+let managerDiscPct = 10; // default manager discount %
+let txCounter = 31;
+let totalSales = 2910.80;
 let offline = false;
 let pendingSync = 3;
 let expWarnCallback = null;
@@ -1751,12 +2284,43 @@ let lockTargetUser = null;
 let cpvPinBuffer = '';      // PIN buffer for cashier verification at checkout
 let cpvTargetUser = null;   // employee selected in CPV modal
 let txCashier = null;       // verified cashier for current transaction
+let cpvContext = 'queue';   // 'queue' | 'cashier' — what happens after PIN
 let txLog = [
-  { txNum:'#TX-0023', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 6:28 AM', items:[{name:'Amoxicillin 500mg',qty:2,price:12},{name:'Paracetamol 500mg',qty:10,price:4},{name:'Cetirizine 10mg',qty:5,price:9}], disc:'none', pay:'cash', subtotal:109, discAmt:0, total:109 },
-  { txNum:'#TX-0022', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 6:14 AM', items:[{name:'Mefenamic Acid 500mg',qty:4,price:8.50}], disc:'senior', pay:'gcash', subtotal:34, discAmt:6.80, total:27.20 },
-  { txNum:'#TX-0021', emp:'Ana Reyes', empColor:'#2196A8', empInitials:'AR', time:'Jun 25, 2026, 5:58 AM', items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:10,price:15}], disc:'none', pay:'maya', subtotal:840, discAmt:0, total:840 },
-  { txNum:'#TX-0020', emp:'Rodel Cruz', empColor:'#9333EA', empInitials:'RC', time:'Jun 25, 2026, 5:44 AM', items:[{name:'Amoxicillin 500mg',qty:8,price:12},{name:'Ascorbic Acid 500mg',qty:10,price:5}], disc:'pwd', pay:'cash', subtotal:146, discAmt:29.20, total:116.80 },
-  { txNum:'#TX-0019', emp:'Rodel Cruz', empColor:'#9333EA', empInitials:'RC', time:'Jun 25, 2026, 5:30 AM', items:[{name:'Omeprazole 20mg',qty:14,price:14}], disc:'none', pay:'cash', subtotal:196, discAmt:0, total:196 },
+  // ── TODAY (Jun 29, 2026) ──
+  { txNum:'#TX-0030', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:52 AM', items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:1200, discAmt:240,   total:960 },
+  { txNum:'#TX-0029', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:31 AM', items:[{name:'Amoxicillin 500mg',qty:14,price:12},{name:'Paracetamol 500mg',qty:20,price:4}], disc:'none', mgrPct:null, pay:'gcash', subtotal:248, discAmt:0,     total:248 },
+  { txNum:'#TX-0028', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:08 AM', items:[{name:'Cetirizine 10mg',qty:10,price:9},{name:'Salbutamol 2mg',qty:10,price:3.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:125, discAmt:0,     total:125 },
+  { txNum:'#TX-0027', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 9:45 AM',  items:[{name:'Omeprazole 20mg',qty:14,price:14},{name:'Ascorbic Acid 500mg',qty:30,price:5}], disc:'pwd', mgrPct:null, pay:'maya',  subtotal:346, discAmt:69.20, total:276.80 },
+  { txNum:'#TX-0026', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 9:20 AM',  items:[{name:'Biogesic 500mg',qty:20,price:6.50},{name:'Mefenamic Acid 500mg',qty:10,price:8.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:215, discAmt:0,     total:215 },
+  { txNum:'#TX-0025', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 8:55 AM',  items:[{name:'Metformin 500mg',qty:60,price:7},{name:'Losartan 50mg',qty:30,price:18}], disc:'manager', mgrPct:15, pay:'cash',  subtotal:960, discAmt:144,   total:816 },
+  { txNum:'#TX-0024', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 8:30 AM',  items:[{name:'Paracetamol 500mg',qty:30,price:4},{name:'Ascorbic Acid 500mg',qty:30,price:5}], disc:'none', mgrPct:null, pay:'gcash', subtotal:270, discAmt:0,     total:270 },
+
+  // ── THIS WEEK (Jun 23–28) ──
+  { txNum:'#TX-0023', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 28, 2026, 3:15 PM',  items:[{name:'Amoxicillin 500mg',qty:21,price:12},{name:'Cetirizine 10mg',qty:14,price:9}], disc:'none', mgrPct:null, pay:'cash',  subtotal:378, discAmt:0,     total:378 },
+  { txNum:'#TX-0022', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 28, 2026, 1:40 PM',  items:[{name:'Mefenamic Acid 500mg',qty:20,price:8.50}], disc:'senior', mgrPct:null, pay:'gcash', subtotal:170, discAmt:34,    total:136 },
+  { txNum:'#TX-0021', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 28, 2026, 11:05 AM', items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Metformin 500mg',qty:60,price:7}], disc:'none', mgrPct:null, pay:'maya',  subtotal:812, discAmt:0,     total:812 },
+  { txNum:'#TX-0020', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 27, 2026, 4:22 PM',  items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:990, discAmt:198,   total:792 },
+  { txNum:'#TX-0019', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 27, 2026, 2:10 PM',  items:[{name:'Amoxicillin 500mg',qty:7,price:12},{name:'Biogesic 500mg',qty:10,price:6.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:149, discAmt:0,     total:149 },
+  { txNum:'#TX-0018', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 27, 2026, 10:48 AM', items:[{name:'Paracetamol 500mg',qty:60,price:4},{name:'Ascorbic Acid 500mg',qty:60,price:5}], disc:'none', mgrPct:null, pay:'gcash', subtotal:540, discAmt:0,     total:540 },
+  { txNum:'#TX-0017', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 26, 2026, 5:30 PM',  items:[{name:'Cloxacillin 500mg',qty:21,price:22},{name:'Mefenamic Acid 500mg',qty:10,price:8.50}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:547, discAmt:109.40,total:437.60 },
+  { txNum:'#TX-0016', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 26, 2026, 3:15 PM',  items:[{name:'Salbutamol 2mg',qty:30,price:3.50},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'none', mgrPct:null, pay:'maya',  subtotal:375, discAmt:0,     total:375 },
+  { txNum:'#TX-0015', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Josie Bautista',   time:'Jun 26, 2026, 1:00 PM',  items:[{name:'Omeprazole 20mg',qty:14,price:14},{name:'Losartan 50mg',qty:30,price:18}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:736, discAmt:147.20,total:588.80 },
+  { txNum:'#TX-0014', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 25, 2026, 6:28 AM',  items:[{name:'Amoxicillin 500mg',qty:2,price:12},{name:'Paracetamol 500mg',qty:10,price:4},{name:'Cetirizine 10mg',qty:5,price:9}], disc:'none', mgrPct:null, pay:'cash',  subtotal:109, discAmt:0,     total:109 },
+  { txNum:'#TX-0013', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 25, 2026, 6:14 AM',  items:[{name:'Mefenamic Acid 500mg',qty:4,price:8.50}], disc:'senior', mgrPct:null, pay:'gcash', subtotal:34,  discAmt:6.80,  total:27.20 },
+  { txNum:'#TX-0012', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 25, 2026, 5:58 AM',  items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:10,price:15}], disc:'none', mgrPct:null, pay:'maya',  subtotal:840, discAmt:0,     total:840 },
+  { txNum:'#TX-0011', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Josie Bautista',   time:'Jun 25, 2026, 5:44 AM',  items:[{name:'Amoxicillin 500mg',qty:8,price:12},{name:'Ascorbic Acid 500mg',qty:10,price:5}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:146, discAmt:29.20, total:116.80 },
+  { txNum:'#TX-0010', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 24, 2026, 4:50 PM',  items:[{name:'Biogesic 500mg',qty:30,price:6.50},{name:'Paracetamol 500mg',qty:30,price:4}], disc:'none', mgrPct:null, pay:'gcash', subtotal:315, discAmt:0,     total:315 },
+  { txNum:'#TX-0009', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Maria Santos',  time:'Jun 24, 2026, 2:30 PM',  items:[{name:'Metformin 500mg',qty:60,price:7},{name:'Losartan 50mg',qty:60,price:18}], disc:'manager', mgrPct:10, pay:'cash',  subtotal:1500, discAmt:150,  total:1350 },
+  { txNum:'#TX-0008', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 23, 2026, 3:45 PM',  items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'none', mgrPct:null, pay:'maya',  subtotal:662, discAmt:0,     total:662 },
+  { txNum:'#TX-0007', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 23, 2026, 1:20 PM',  items:[{name:'Amoxicillin 500mg',qty:14,price:12},{name:'Cloxacillin 500mg',qty:7,price:22}], disc:'none', mgrPct:null, pay:'cash',  subtotal:322, discAmt:0,     total:322 },
+
+  // ── EARLIER THIS MONTH (Jun 1–22) ──
+  { txNum:'#TX-0006', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 20, 2026, 11:30 AM', items:[{name:'Losartan 50mg',qty:60,price:18},{name:'Metformin 500mg',qty:60,price:7},{name:'Amlodipine 5mg',qty:60,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:2400, discAmt:480,  total:1920 },
+  { txNum:'#TX-0005', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Josie Bautista',  time:'Jun 15, 2026, 2:00 PM',  items:[{name:'Ascorbic Acid 500mg',qty:100,price:5},{name:'Biogesic 500mg',qty:50,price:6.50}], disc:'none', mgrPct:null, pay:'gcash', subtotal:825, discAmt:0,     total:825 },
+  { txNum:'#TX-0004', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 10, 2026, 9:15 AM',  items:[{name:'Paracetamol 500mg',qty:100,price:4},{name:'Mefenamic Acid 500mg',qty:50,price:8.50}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:825, discAmt:165,   total:660 },
+  { txNum:'#TX-0003', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Josie Bautista',   time:'Jun 5, 2026, 10:00 AM',  items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Salbutamol 2mg',qty:30,price:3.50}], disc:'none', mgrPct:null, pay:'maya',  subtotal:497, discAmt:0,     total:497 },
+  { txNum:'#TX-0002', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 3, 2026, 3:30 PM',   items:[{name:'Amoxicillin 500mg',qty:28,price:12},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'manager', mgrPct:20, pay:'gcash', subtotal:606, discAmt:121.20,total:484.80 },
+  { txNum:'#TX-0001', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 1, 2026, 8:00 AM',   items:[{name:'Metformin 500mg',qty:90,price:7},{name:'Losartan 50mg',qty:90,price:18}], disc:'none', mgrPct:null, pay:'cash',  subtotal:2250, discAmt:0,    total:2250 },
 ];
 
 const REGISTERED_USERS = [
@@ -1777,7 +2341,7 @@ function fefo(p) {
 function expSev(p) {
   const b = fefo(p); if (!b) return 'none';
   const d = daysLeft(b.exp);
-  return d <= 0 ? 'expired' : d <= 30 ? 'crit' : d <= 60 ? 'warn' : 'none';
+  return d <= 0 ? 'expired' : d <= 180 ? 'crit' : d <= 270 ? 'warn' : 'none';
 }
 function pesos(n) { return '₱'+n.toFixed(2); }
 function nowTime() { return new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:false}); }
@@ -1841,6 +2405,7 @@ function switchUser(user) {
   const posName = document.getElementById('pos-cashier-name');
   if (posAv) { posAv.textContent = user.initials; posAv.style.background = user.color; }
   if (posName) posName.textContent = user.name;
+  updateDiscPillVisibility();
   toast(`Ready · ${user.name}`, 'success');
 }
 
@@ -2011,14 +2576,24 @@ function updateCpvDots() {
 }
 
 function validateCpv() {
-  // Demo: any 4-digit PIN accepted — production checks hashed PIN
   if (cpvPinBuffer.length === 4) {
-    txCashier = cpvTargetUser; // lock in verified cashier for this transaction
+    if (!cpvTargetUser) {
+      document.getElementById('cpv-error').textContent = 'Please select your name first.';
+      cpvPinBuffer = '';
+      updateCpvDots();
+      return;
+    }
+    const verified = cpvTargetUser;
     cpvPinBuffer = '';
     cpvTargetUser = null;
     closeOverlay('ov-cashier-pin');
-    // Now open the actual payment modal
-    doOpenPayModal();
+    if (cpvContext === 'queue') {
+      sendToQueue(verified);
+    } else if (cpvContext === 'cashier') {
+      closeOverlay('ov-cashier-process');
+      // Small delay so the cashier-process overlay fully closes before pay modal opens
+      setTimeout(() => processCashierPayment(verified), 120);
+    }
   } else {
     document.getElementById('cpv-error').textContent = 'Incorrect PIN. Try again.';
     cpvPinBuffer = '';
@@ -2027,7 +2602,7 @@ function validateCpv() {
 }
 
 /* ── NAVIGATION ───────────────────────────── */
-const PAGE_TITLES = { dashboard:'Dashboard', pos:'Point of Sale', inventory:'Products & Stock', expiry:'Expiry Monitor', attendance:'Employees', txlog:'Transaction Log', reports:'Reports & Export' };
+const PAGE_TITLES = { dashboard:'Dashboard', pos:'Point of Sale', queue:'Order Queue', inventory:'Products & Stock', expiry:'Expiry Monitor', attendance:'Employees', summary:'Sales Summary', txlog:'Transaction Log', reports:'Reports & Export' };
 
 window.nav = function(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -2041,6 +2616,8 @@ window.nav = function(id, el) {
     document.getElementById('sync-count').textContent = pendingSync;
     document.getElementById('r-sales').textContent = '₱'+totalSales.toLocaleString();
   }
+  if (id === 'queue') renderQueue();
+  if (id === 'summary') renderSalesSummary();
   if (id === 'txlog') {
     populateTxLogEmpFilter();
     renderTxLog();
@@ -2092,12 +2669,15 @@ function renderProds(list) {
     const sev = expSev(p);
     const oos = stock === 0;
     const dot = sev!=='none' ? `<div class="prod-exp-dot ${sev}" title="Near expiry"></div>` : '';
-    return `<div class="prod-card${oos?' oos':''}" onclick="${oos?"toast('Out of stock','error')":`addToCart(${p.id})`}">
+    const stockLabel = oos
+      ? `<span style="color:#92400E;font-weight:700">⚠ Backordered</span>`
+      : `<span style="color:var(--slate400)">✓ ${stock} ${p.unit}s</span>`;
+    return `<div class="prod-card${oos?' oos':''}" onclick="addToCart(${p.id})">
       ${dot}
       <div class="prod-card-name">${p.name}</div>
       <div class="prod-card-generic">${p.generic}</div>
       <div class="prod-card-price">${pesos(p.price)}</div>
-      <div class="prod-card-stock">${oos?'❌ Out of stock':'✓ '+stock+' '+p.unit+'s'}</div>
+      <div class="prod-card-stock">${stockLabel}</div>
     </div>`;
   }).join('') || '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--slate400)">No products found</div>';
 }
@@ -2105,24 +2685,35 @@ function renderProds(list) {
 window.addToCart = function(pid) {
   const p = PRODUCTS.find(x=>x.id===pid);
   if (!p) return;
-  const b = fefo(p);
-  if (!b) { toast('Out of stock','error'); return; }
+  // Use FEFO batch if available, otherwise fall back to first batch (backorder)
+  const b = fefo(p) || p.batches[0];
+  if (!b) { toast('No batch found for this product','error'); return; }
   const d = daysLeft(b.exp);
   if (d <= 0) { toast('Cannot sell expired medicine','error'); return; }
-  if (d <= 30) {
-    expWarnCallback = () => pushToCart(p, b);
+  const isBackorder = totalStock(p) === 0;
+  if (d <= 180) {
+    expWarnCallback = () => pushToCart(p, b, isBackorder);
     document.getElementById('expwarn-text').textContent = `Batch ${b.id} of ${p.name} expires in ${d} days. Continue with sale?`;
     openOverlay('ov-expwarn');
     return;
   }
-  pushToCart(p, b);
+  pushToCart(p, b, isBackorder);
 };
 
-function pushToCart(p, b) {
+function pushToCart(p, b, isBackorder) {
   const ex = cart.find(c=>c.pid===p.id && c.bid===b.id);
-  if (ex) { ex.qty++; } else { cart.push({ pid:p.id, bid:b.id, name:p.name, batch:b.id, exp:b.exp, price:p.price, qty:1, unit:p.unit }); }
+  if (ex) {
+    ex.qty++;
+    ex.backorder = isBackorder;
+  } else {
+    cart.push({ pid:p.id, bid:b.id, name:p.name, batch:b.id, exp:b.exp, price:p.price, qty:1, unit:p.unit, backorder:!!isBackorder });
+  }
   renderCart();
-  toast(p.name+' added','success');
+  if (isBackorder) {
+    toast(`${p.name} added as backorder — stock will go negative`, 'warning');
+  } else {
+    toast(p.name+' added', 'success');
+  }
 }
 
 window.expWarnClose = function(proceed) {
@@ -2138,12 +2729,32 @@ window.chgQty = function(pid, delta) {
   if (cart[i].qty <= 0) cart.splice(i,1);
   renderCart();
 };
+window.setQty = function(pid, val) {
+  const qty = parseInt(val);
+  const i = cart.findIndex(c=>c.pid===pid);
+  if (i===-1) return;
+  if (!qty || qty < 1) {
+    // Remove item if 0 or invalid
+    cart.splice(i,1);
+  } else {
+    cart[i].qty = qty;
+  }
+  renderCart();
+};
 window.delCartItem = function(pid) { cart = cart.filter(c=>c.pid!==pid); renderCart(); };
 
 function calcDiscounted(subtotal) {
   if (discType === 'none') return { discAmt: 0, total: subtotal };
-  const discAmt = subtotal * 0.20;
+  const pct = discType === 'manager' ? managerDiscPct : 20;
+  const discAmt = subtotal * (pct / 100);
   return { discAmt, total: subtotal - discAmt };
+}
+
+function discLabel(discType) {
+  if (discType === 'senior') return 'Senior Citizen Discount (20%)';
+  if (discType === 'pwd')    return 'PWD Discount (20%)';
+  if (discType === 'manager') return `Manager Discount (${managerDiscPct}%)`;
+  return '';
 }
 
 function renderCart() {
@@ -2162,10 +2773,14 @@ function renderCart() {
       <div class="cart-item-info">
         <div class="cart-item-name">${c.name}</div>
         <div class="cart-item-batch">Batch ${c.batch} · Exp ${c.exp}</div>
+        ${c.backorder ? `<div class="backorder-tag">⚠ Backorder</div>` : ''}
       </div>
       <div class="qty-ctrl">
         <div class="qty-btn" onclick="chgQty(${c.pid},-1)">−</div>
-        <div class="qty-num">${c.qty}</div>
+        <input class="qty-num" type="number" min="1" value="${c.qty}"
+          onchange="setQty(${c.pid}, this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()"
+          onclick="this.select()">
         <div class="qty-btn" onclick="chgQty(${c.pid},1)">+</div>
       </div>
       <div class="cart-item-price">${pesos(c.price*c.qty)}</div>
@@ -2177,9 +2792,10 @@ function renderCart() {
   const discRow = document.getElementById('sum-disc-row');
   if (discType !== 'none') {
     discRow.style.display = 'flex';
-    discRow.className = 'order-summary-row disc-line' + (discType==='pwd'?' pwd-line':'');
-    document.getElementById('sum-disc-label').textContent =
-      discType === 'senior' ? 'Senior Citizen Discount (20%)' : 'PWD Discount (20%)';
+    discRow.className = 'order-summary-row disc-line'
+      + (discType==='pwd'?' pwd-line':'')
+      + (discType==='manager'?' mgr-line':'');
+    document.getElementById('sum-disc-label').textContent = discLabel(discType);
     document.getElementById('sum-disc-amt').textContent = '−'+pesos(discAmt);
   } else {
     discRow.style.display = 'none';
@@ -2191,11 +2807,37 @@ function renderCart() {
 
 window.selDisc = function(d) {
   discType = d;
-  document.getElementById('dp-none').className   = 'disc-pill' + (d==='none'  ?' sel-none':'');
-  document.getElementById('dp-senior').className = 'disc-pill' + (d==='senior'?' sel-senior':'');
-  document.getElementById('dp-pwd').className    = 'disc-pill' + (d==='pwd'   ?' sel-pwd':'');
+  document.getElementById('dp-none').className   = 'disc-pill' + (d==='none'    ?' sel-none':'');
+  document.getElementById('dp-senior').className = 'disc-pill' + (d==='senior'  ?' sel-senior':'');
+  document.getElementById('dp-pwd').className    = 'disc-pill' + (d==='pwd'     ?' sel-pwd':'');
+  document.getElementById('dp-mgr').className    = 'disc-pill' + (d==='manager' ?' sel-mgr':'');
+  // Show manager pct input only when manager selected
+  const mgrRow = document.getElementById('mgr-disc-row');
+  if (mgrRow) mgrRow.classList.toggle('show', d === 'manager');
   renderCart();
 };
+
+window.applyMgrDisc = function() {
+  const input = document.getElementById('mgr-disc-pct');
+  const val = parseFloat(input.value);
+  if (!val || val < 1 || val > 100) {
+    toast('Enter a valid discount (1–100%)', 'error');
+    input.focus(); return;
+  }
+  managerDiscPct = val;
+  renderCart();
+  toast(`Manager discount set to ${val}%`, 'success');
+};
+
+// Show/hide manager pill based on current user role
+function updateDiscPillVisibility() {
+  const mgrPill = document.getElementById('dp-mgr');
+  if (!mgrPill) return;
+  const canMgr = currentUser.role === 'Manager' || currentUser.role === 'Admin';
+  mgrPill.style.display = canMgr ? '' : 'none';
+  // If manager discount was active but user switched to non-manager, reset
+  if (!canMgr && discType === 'manager') selDisc('none');
+}
 
 window.selPay = function(m) {
   payMethod = m;
@@ -2226,11 +2868,13 @@ function doOpenPayModal() {
 };
 
 window.calcChange = function() {
-  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty,0);
-  const { total } = calcDiscounted(subtotal);
+  const total = activeQueueOrder
+    ? activeQueueOrder.total
+    : (()=>{ const sub=cart.reduce((s,c)=>s+c.price*c.qty,0); return calcDiscounted(sub).total; })();
   const tendered = parseFloat(document.getElementById('cash-in').value)||0;
   const change = tendered - total;
-  document.getElementById('change-amt').textContent = change>=0?pesos(change):'—';
+  const pm = activeQueueOrder ? cpPayMethod : payMethod;
+  document.getElementById('change-amt').textContent = (pm !== 'cash' || change >= 0) ? pesos(Math.max(0, change)) : '—';
 };
 
 window.confirmPay = function() {
@@ -2247,8 +2891,8 @@ window.confirmPay = function() {
     txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
     time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
     items: cart.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
-    disc: discType, pay: payMethod,
-    subtotal, discAmt, total,
+    disc: discType, mgrPct: discType==='manager'?managerDiscPct:null,
+    pay: payMethod, subtotal, discAmt, total,
   });
   buildReceipt(txNum, subtotal, discAmt, total, tendered, cashier);
   addTxToList(txNum, total, cashier);
@@ -2285,6 +2929,7 @@ function buildReceipt(txNum, subtotal, discAmt, total, tendered, cashier) {
 window.resetOrder = function() {
   closeOverlay('ov-receipt');
   cart = [];
+  activeQueueOrder = null;
   renderCart();
 };
 
@@ -2295,6 +2940,600 @@ function addTxToList(txNum, amount, cashier) {
   row.className = 'tx-row';
   row.innerHTML = `<span class="tx-num">${txNum}</span><span class="tx-cashier">${cashier.name}</span><span class="tx-count">${cart.length||1} item</span><span class="tx-amount">${pesos(amount)}</span>`;
   list.prepend(row);
+}
+
+/* ── ORDER QUEUE ──────────────────────────── */
+let orderQueue = []; // array of queued orders
+let queueCounter = 0;
+let activeQueueOrder = null; // order currently being processed by cashier
+let cpPayMethod = 'cash';
+
+// Called when pharmacist taps "Review & Send to Queue"
+window.openOrderSummary = function() {
+  if (!cart.length) return;
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  const { discAmt, total } = calcDiscounted(subtotal);
+  document.getElementById('os-items').innerHTML = cart.map(c=>`
+    <div class="os-item-row">
+      <div class="os-item-name">${c.name}<span style="font-size:10px;color:var(--slate400);display:block">Batch ${c.batch}${c.backorder?' · ⚠ Backorder':''}</span></div>
+      <div class="os-item-qty">×${c.qty}</div>
+      <div class="os-item-price">${pesos(c.price*c.qty)}</div>
+    </div>`).join('');
+  document.getElementById('os-subtotal').textContent = pesos(subtotal);
+  document.getElementById('os-total').textContent = pesos(total);
+  const discRow = document.getElementById('os-disc-row');
+  if (discType !== 'none') {
+    discRow.style.display = 'flex';
+    document.getElementById('os-disc-label').textContent = discLabel(discType);
+    document.getElementById('os-disc-amt').textContent = '−'+pesos(discAmt);
+  } else {
+    discRow.style.display = 'none';
+  }
+  openOverlay('ov-order-summary');
+};
+
+// After order summary, open CPV for pharmacist PIN
+window.openCpvForQueue = function() {
+  closeOverlay('ov-order-summary');
+  cpvContext = 'queue'; // tell CPV what to do after PIN
+  openCpvModal();
+};
+
+// After pharmacist PIN verified — push order to queue
+function sendToQueue(pharmacist) {
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  const { discAmt, total } = calcDiscounted(subtotal);
+  queueCounter++;
+  const order = {
+    id: 'Q-' + String(queueCounter).padStart(3,'0'),
+    pharmacist: { name: pharmacist.name, initials: pharmacist.initials, color: pharmacist.color },
+    items: cart.map(c=>({ ...c })), // deep copy
+    disc: discType,
+    mgrPct: discType === 'manager' ? managerDiscPct : null,
+    discAmt, subtotal, total,
+    time: new Date(),
+    status: 'pending',
+  };
+  orderQueue.push(order);
+  // Clear POS
+  cart = [];
+  discType = 'none';
+  managerDiscPct = 10;
+  selDisc('none');
+  renderCart();
+  updateQueueBadge();
+  toast(`Order ${order.id} queued for cashier`, 'success');
+  nav('queue');
+}
+
+function updateQueueBadge() {
+  const count = orderQueue.filter(o=>o.status==='pending').length;
+  const navBadge = document.getElementById('queue-nav-cnt');
+  const bnBadge = document.getElementById('bn-queue-cnt');
+  if (navBadge) { navBadge.textContent = count; navBadge.style.display = count > 0 ? 'inline-flex' : 'none'; }
+  if (bnBadge) { bnBadge.textContent = count; bnBadge.style.display = count > 0 ? 'flex' : 'none'; }
+  document.getElementById('queue-counter').textContent = count + ' pending';
+}
+
+function timeAgo(date) {
+  const mins = Math.floor((new Date() - date) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + ' min' + (mins>1?'s':'') + ' ago';
+  const hrs = Math.floor(mins/60);
+  return hrs + ' hr' + (hrs>1?'s':'') + ' ago';
+}
+
+function renderQueue() {
+  const pending = orderQueue.filter(o=>o.status==='pending');
+  updateQueueBadge();
+  if (!pending.length) {
+    document.getElementById('queue-list').innerHTML = `
+      <div class="queue-empty">
+        <div class="queue-empty-icon">🎫</div>
+        <div class="queue-empty-text">No orders in queue</div>
+        <div class="queue-empty-sub">Pharmacist orders will appear here</div>
+      </div>`;
+    return;
+  }
+  document.getElementById('queue-list').innerHTML = pending.map(o=>{
+    const discLine = o.disc !== 'none' ? `
+      <div class="queue-disc-row">
+        <span>${o.disc==='senior'?'👴 Senior Citizen':o.disc==='pwd'?'♿ PWD':`🏷 Manager (${o.mgrPct||10}%)`} Discount</span>
+        <span>−${pesos(o.discAmt)}</span>
+      </div>` : '';
+    const items = o.items.map(c=>`
+      <div class="queue-item-row">
+        <span class="queue-item-name">${c.name}${c.backorder?' <span style="font-size:9px;color:#92400E">⚠ BO</span>':''}</span>
+        <span class="queue-item-qty">×${c.qty}</span>
+        <span class="queue-item-price">${pesos(c.price*c.qty)}</span>
+      </div>`).join('');
+    return `<div class="queue-card" id="qcard-${o.id}">
+      <div class="queue-card-head">
+        <div class="queue-order-num">${o.id}</div>
+        <div class="queue-card-meta">
+          <div class="queue-pharmacist">
+            <div class="queue-pharmacist-av" style="background:${o.pharmacist.color}">${o.pharmacist.initials}</div>
+            ${o.pharmacist.name}
+          </div>
+          <div class="queue-time">${timeAgo(o.time)}</div>
+        </div>
+        <div class="queue-total">${pesos(o.total)}</div>
+      </div>
+      <div class="queue-card-body">${items}${discLine}</div>
+      <div class="queue-card-foot">
+        <button class="queue-process-btn" onclick="openCashierProcess('${o.id}')">💳 Process Payment</button>
+        <button class="queue-cancel-btn" onclick="cancelQueueOrder('${o.id}')">Cancel</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.cancelQueueOrder = function(id) {
+  const o = orderQueue.find(x=>x.id===id);
+  if (!o) return;
+  o.status = 'cancelled';
+  renderQueue();
+  toast(`Order ${id} cancelled`, 'warning');
+};
+
+// Cashier opens an order to process
+window.openCashierProcess = function(id) {
+  const o = orderQueue.find(x=>x.id===id);
+  if (!o) return;
+  activeQueueOrder = JSON.parse(JSON.stringify(o)); // working copy
+  activeQueueOrder.time = new Date(o.time); // restore Date object after JSON clone
+  cpPayMethod = 'cash';
+  renderCashierProcess();
+  openOverlay('ov-cashier-process');
+};
+
+function renderCashierProcess() {
+  const o = activeQueueOrder;
+  document.getElementById('cp-order-num').textContent = `Order ${o.id}`;
+  document.getElementById('cp-pharmacist-line').textContent = `By ${o.pharmacist.name} · ${timeAgo(o.time)}`;
+  // Disc chip
+  const discChip = document.getElementById('cp-disc-chip');
+  if (o.disc !== 'none') {
+    discChip.style.display = 'inline-flex';
+    discChip.innerHTML = `<span class="chip ${o.disc==='senior'?'chip-blue':o.disc==='pwd'?'chip-amber':'chip-slate'}" style="${o.disc==='manager'?'background:#F5F0FF;color:#6B21A8':''}">${o.disc==='senior'?'👴 Senior 20%':o.disc==='pwd'?'♿ PWD 20%':`🏷 Manager ${o.mgrPct||10}%`}</span>`;
+  } else {
+    discChip.style.display = 'none';
+  }
+  // Editable items
+  document.getElementById('cp-items').innerHTML = o.items.map((c,i)=>`
+    <div class="cp-item-row">
+      <div style="flex:1;min-width:0">
+        <div class="cp-item-name">${c.name}</div>
+        <span class="cp-item-batch">Batch ${c.batch}${c.backorder?' · ⚠ Backorder':''}</span>
+      </div>
+      <div class="cp-qty-ctrl">
+        <div class="qty-btn" onclick="cpChgQty(${i},-1)" style="background:var(--slate100);color:var(--slate700);border-color:var(--slate200)">−</div>
+        <input class="cp-qty-input" type="number" min="1" value="${c.qty}"
+          onchange="cpSetQty(${i},this.value)" onclick="this.select()">
+        <div class="qty-btn" onclick="cpChgQty(${i},1)" style="background:var(--slate100);color:var(--slate700);border-color:var(--slate200)">+</div>
+      </div>
+      <div class="cp-item-price">${pesos(c.price*c.qty)}</div>
+      <div class="cp-del" onclick="cpDelItem(${i})">✕</div>
+    </div>`).join('');
+  updateCpSummary();
+}
+
+function updateCpSummary() {
+  const o = activeQueueOrder;
+  const subtotal = o.items.reduce((s,c)=>s+c.price*c.qty, 0);
+  const pct = o.disc === 'manager' ? (o.mgrPct || 10) : 20;
+  const discAmt = o.disc !== 'none' ? subtotal * (pct/100) : 0;
+  const total = subtotal - discAmt;
+  o.subtotal = subtotal; o.discAmt = discAmt; o.total = total;
+  document.getElementById('cp-subtotal').textContent = pesos(subtotal);
+  const dr = document.getElementById('cp-disc-row');
+  if (o.disc !== 'none') {
+    dr.style.display = 'flex';
+    const lbl = o.disc==='senior'?'Senior Citizen (20%)':o.disc==='pwd'?'PWD (20%)':`Manager Discount (${pct}%)`;
+    document.getElementById('cp-disc-label').textContent = lbl;
+    document.getElementById('cp-disc-amt').textContent = '−'+pesos(discAmt);
+  } else { dr.style.display = 'none'; }
+  document.getElementById('cp-total').textContent = pesos(total);
+  document.getElementById('cp-charge-btn').textContent = `Charge ${pesos(total)}`;
+}
+
+window.cpChgQty = function(idx, delta) {
+  activeQueueOrder.items[idx].qty += delta;
+  if (activeQueueOrder.items[idx].qty <= 0) activeQueueOrder.items.splice(idx,1);
+  if (!activeQueueOrder.items.length) { closeOverlay('ov-cashier-process'); toast('All items removed — order cancelled','warning'); return; }
+  renderCashierProcess();
+};
+window.cpSetQty = function(idx, val) {
+  const qty = parseInt(val);
+  if (!qty || qty < 1) { activeQueueOrder.items.splice(idx,1); }
+  else { activeQueueOrder.items[idx].qty = qty; }
+  if (!activeQueueOrder.items.length) { closeOverlay('ov-cashier-process'); toast('All items removed — order cancelled','warning'); return; }
+  renderCashierProcess();
+};
+window.cpDelItem = function(idx) {
+  activeQueueOrder.items.splice(idx,1);
+  if (!activeQueueOrder.items.length) { closeOverlay('ov-cashier-process'); toast('All items removed — order cancelled','warning'); return; }
+  renderCashierProcess();
+};
+window.cpSelPay = function(m) {
+  cpPayMethod = m;
+  ['cash','gcash','maya'].forEach(x=>document.getElementById('cp-pm-'+x).classList.toggle('sel',x===m));
+};
+
+// Cashier taps Charge → go straight to payment (cashier already identified by session)
+window.openCpvForCashier = function() {
+  closeOverlay('ov-cashier-process');
+  setTimeout(() => processCashierPayment(currentUser), 80);
+};
+
+// After cashier PIN verified — open payment modal
+function processCashierPayment(cashier) {
+  const o = activeQueueOrder;
+  const total = o.total;
+  document.getElementById('pay-title').textContent = cpPayMethod==='cash'?'💵 Cash Payment':cpPayMethod==='gcash'?'📱 GCash':'💳 Maya';
+  document.getElementById('pay-sub').textContent = `Order ${o.id} · ${pesos(total)} · Cashier: ${cashier.name}`;
+  const ci = document.getElementById('cash-in');
+  ci.value = cpPayMethod !== 'cash' ? total.toFixed(2) : '';
+  document.getElementById('change-amt').textContent = '₱0.00';
+  window._queueCashier = cashier;
+  openOverlay('ov-pay');
+  setTimeout(()=>ci.focus(), 150);
+}
+
+// Override confirmPay to handle both POS and Queue flows
+window.confirmPay = function() {
+  if (activeQueueOrder) {
+    // Queue flow
+    const o = activeQueueOrder;
+    const total = o.total;
+    const tendered = parseFloat(document.getElementById('cash-in').value)||0;
+    if (cpPayMethod==='cash' && tendered < total) { toast('Amount less than total','error'); return; }
+    closeOverlay('ov-pay');
+    const txNum = '#TX-'+String(txCounter++).padStart(4,'0');
+    totalSales += total;
+    const cashier = window._queueCashier || currentUser;
+    // Log with both pharmacist + cashier
+    txLog.unshift({
+      txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
+      pharmacist: o.pharmacist.name,
+      time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
+      items: o.items.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
+      disc: o.disc, mgrPct: o.mgrPct||null, pay: cpPayMethod,
+      subtotal: o.subtotal, discAmt: o.discAmt, total: o.total,
+    });
+    buildQueueReceipt(txNum, o, tendered, cashier);
+    addTxToList(txNum, total, cashier);
+    document.getElementById('d-sales').textContent = '₱'+totalSales.toLocaleString();
+    // Mark order complete
+    const orig = orderQueue.find(x=>x.id===o.id);
+    if (orig) orig.status = 'done';
+    activeQueueOrder = null;
+    window._queueCashier = null;
+    updateQueueBadge();
+    renderQueue();
+  } else {
+    // Legacy POS direct flow (fallback)
+    const subtotal = cart.reduce((s,c)=>s+c.price*c.qty,0);
+    const { discAmt, total } = calcDiscounted(subtotal);
+    const tendered = parseFloat(document.getElementById('cash-in').value)||0;
+    if (payMethod==='cash' && tendered < total) { toast('Amount less than total','error'); return; }
+    closeOverlay('ov-pay');
+    const txNum = '#TX-'+String(txCounter++).padStart(4,'0');
+    totalSales += total;
+    const cashier = txCashier || currentUser;
+    txLog.unshift({
+      txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
+      time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
+      items: cart.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
+      disc: discType, pay: payMethod, subtotal, discAmt, total,
+    });
+    buildReceipt(txNum, subtotal, discAmt, total, tendered, cashier);
+    addTxToList(txNum, total, cashier);
+    document.getElementById('d-sales').textContent = '₱'+totalSales.toLocaleString();
+    discType = 'none'; selDisc('none'); txCashier = null;
+  }
+};
+
+function buildQueueReceipt(txNum, o, tendered, cashier) {
+  const now = new Date();
+  const change = tendered - o.total;
+  const items = o.items.map(c=>`<div class="receipt-item-row"><span class="ri-name">${c.name} ×${c.qty}</span><span class="ri-price">${pesos(c.price*c.qty)}</span></div>`).join('');
+  const discLine = o.disc!=='none'
+    ? `<div class="receipt-change-row"><span>${o.disc==='senior'?'Senior Citizen':'PWD'} Discount (20%)</span><span style="color:#1E6F8F;font-weight:700">−${pesos(o.discAmt)}</span></div>` : '';
+  const subLine = o.disc!=='none' ? `<div class="receipt-change-row"><span>Subtotal</span><span>${pesos(o.subtotal)}</span></div>` : '';
+  document.getElementById('receipt-body').innerHTML = `
+    <div class="receipt-tx">${txNum} · ${o.id}</div>
+    <div style="font-size:10px;color:var(--slate400);margin-bottom:8px">${now.toLocaleString('en-PH')} · Cashier: ${cashier.name}</div>
+    <div style="font-size:10px;color:var(--slate400);margin-bottom:8px">Pharmacist: ${o.pharmacist.name}</div>
+    <div class="receipt-items">${items}</div>
+    ${subLine}${discLine}
+    <div class="receipt-total"><span>TOTAL</span><span>${pesos(o.total)}</span></div>
+    ${cpPayMethod==='cash'?`<div class="receipt-change-row"><span>Cash</span><span>${pesos(tendered)}</span></div><div class="receipt-change-row"><span>Change</span><span style="color:var(--g600);font-weight:700">${pesos(change)}</span></div>`:''}
+    <div class="receipt-change-row"><span>Payment</span><span>${cpPayMethod.toUpperCase()}</span></div>`;
+  openOverlay('ov-receipt');
+}
+
+/* ── SALES SUMMARY ───────────────────────── */
+let ssPeriod = 'month';
+
+window.setSsPeriod = function(p, el) {
+  ssPeriod = p;
+  document.querySelectorAll('.ss-period-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderSalesSummary();
+};
+
+function getFilteredTx() {
+  const now = new Date();
+  return txLog.filter(t => {
+    if (ssPeriod === 'all') return true;
+    // Parse time string back to date for filtering
+    const d = new Date(t.time);
+    if (isNaN(d)) return true; // seed data with string times — include all
+    if (ssPeriod === 'today') return d.toDateString() === now.toDateString();
+    if (ssPeriod === 'week') {
+      const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7);
+      return d >= weekAgo;
+    }
+    if (ssPeriod === 'month') {
+      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    }
+    return true;
+  });
+}
+
+function renderSalesSummary() {
+  const tx = getFilteredTx();
+
+  // ── Core metrics ──
+  const grossSales    = tx.reduce((s,t)=>s+t.subtotal, 0);
+  const totalDisc     = tx.reduce((s,t)=>s+t.discAmt, 0);
+  const netSales      = tx.reduce((s,t)=>s+t.total, 0);
+  const refunds       = 0; // placeholder — refund module not built yet
+  const txCount       = tx.length;
+  const avgBasket     = txCount ? netSales/txCount : 0;
+
+  // COGS — match items to product cost
+  const costMap = {};
+  PRODUCTS.forEach(p=>{ costMap[p.name] = p.cost||0; });
+  let totalCOGS = 0;
+  tx.forEach(t=>{
+    t.items.forEach(it=>{
+      const cost = costMap[it.name]||0;
+      totalCOGS += cost * it.qty;
+    });
+  });
+  const grossProfit   = netSales - totalCOGS;
+  const grossMargin   = netSales > 0 ? (grossProfit/netSales)*100 : 0;
+
+  // ── Payment breakdown ──
+  const payTotals = { cash:0, gcash:0, maya:0 };
+  tx.forEach(t=>{ if (payTotals[t.pay]!==undefined) payTotals[t.pay]+=t.total; });
+
+  // ── Discount breakdown ──
+  const discBreak = { senior:{ amt:0, count:0 }, pwd:{ amt:0, count:0 }, manager:{ amt:0, count:0 } };
+  tx.forEach(t=>{
+    if (t.disc && t.disc!=='none' && discBreak[t.disc]) {
+      discBreak[t.disc].amt += t.discAmt;
+      discBreak[t.disc].count++;
+    }
+  });
+
+  // ── Top products ──
+  const prodMap = {};
+  tx.forEach(t=>{
+    t.items.forEach(it=>{
+      if (!prodMap[it.name]) prodMap[it.name] = { name:it.name, cat:'', qty:0, rev:0, cost:0 };
+      prodMap[it.name].qty += it.qty;
+      prodMap[it.name].rev += it.price*it.qty;
+      prodMap[it.name].cost += (costMap[it.name]||0)*it.qty;
+    });
+  });
+  // attach category
+  PRODUCTS.forEach(p=>{ if(prodMap[p.name]) prodMap[p.name].cat=p.cat; });
+  const topProds = Object.values(prodMap).sort((a,b)=>b.rev-a.rev).slice(0,8);
+
+  // ── Cashier performance ──
+  const cashierMap = {};
+  tx.forEach(t=>{
+    const k = t.emp;
+    if (!cashierMap[k]) cashierMap[k] = { name:t.emp, color:t.empColor, initials:t.empInitials, total:0, count:0, disc:0 };
+    cashierMap[k].total += t.total;
+    cashierMap[k].count++;
+    cashierMap[k].disc += t.discAmt;
+  });
+  const cashiers = Object.values(cashierMap).sort((a,b)=>b.total-a.total);
+
+  // ── RENDER ──
+
+  // Hero cards
+  document.getElementById('ss-hero').innerHTML = `
+    <div class="ss-hero-card gross">
+      <div class="ss-hero-icon">💰</div>
+      <div class="ss-hero-label">Gross Sales</div>
+      <div class="ss-hero-value">${pesos(grossSales)}</div>
+      <div class="ss-hero-sub">${txCount} transaction${txCount!==1?'s':''}</div>
+    </div>
+    <div class="ss-hero-card net">
+      <div class="ss-hero-icon">📊</div>
+      <div class="ss-hero-label">Net Sales</div>
+      <div class="ss-hero-value">${pesos(netSales)}</div>
+      <div class="ss-hero-sub">After ${pesos(totalDisc)} discounts</div>
+    </div>
+    <div class="ss-hero-card profit">
+      <div class="ss-hero-icon">📈</div>
+      <div class="ss-hero-label">Gross Profit</div>
+      <div class="ss-hero-value">${pesos(grossProfit)}</div>
+      <div class="ss-hero-sub">${grossMargin.toFixed(1)}% margin</div>
+    </div>
+    <div class="ss-hero-card refund">
+      <div class="ss-hero-icon">↩️</div>
+      <div class="ss-hero-label">Refunds</div>
+      <div class="ss-hero-value">${pesos(refunds)}</div>
+      <div class="ss-hero-sub">0 refund transactions</div>
+    </div>`;
+
+  // Income breakdown
+  document.getElementById('ss-breakdown').innerHTML = `
+    <div class="ss-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:var(--g100)">💰</div>Gross Sales</div>
+      <div class="ss-row-value green">${pesos(grossSales)}</div>
+    </div>
+    <div class="ss-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:var(--red-bg)">↩️</div>Refunds</div>
+      <div class="ss-row-value red">−${pesos(refunds)}</div>
+    </div>
+    <div class="ss-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:var(--amber-bg)">🏷</div>Total Discounts</div>
+      <div class="ss-row-value amber">−${pesos(totalDisc)}</div>
+    </div>
+    <div class="ss-row total-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:var(--blue-bg)">📊</div>Net Sales</div>
+      <div class="ss-row-value blue">${pesos(netSales)}</div>
+    </div>
+    <div class="ss-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:#F5F0FF">📦</div>Cost of Goods Sold (COGS)</div>
+      <div class="ss-row-value slate">−${pesos(totalCOGS)}</div>
+    </div>
+    <div class="ss-row total-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:#F5F0FF">📈</div>Gross Profit</div>
+      <div class="ss-row-value purple">${pesos(grossProfit)}</div>
+    </div>
+    <div class="ss-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:var(--slate100)">🛒</div>Avg Basket Size</div>
+      <div class="ss-row-value slate">${pesos(avgBasket)}</div>
+    </div>
+    <div class="ss-row">
+      <div class="ss-row-label"><div class="ss-row-icon" style="background:var(--slate100)">🔢</div>Total Transactions</div>
+      <div class="ss-row-value slate">${txCount}</div>
+    </div>`;
+
+  // Discount breakdown
+  document.getElementById('ss-disc-grid').innerHTML = `
+    <div class="disc-mini-card">
+      <div class="disc-mini-icon">👴</div>
+      <div class="disc-mini-label">Senior</div>
+      <div class="disc-mini-amt">−${pesos(discBreak.senior.amt)}</div>
+      <div class="disc-mini-count">${discBreak.senior.count} tx</div>
+    </div>
+    <div class="disc-mini-card">
+      <div class="disc-mini-icon">♿</div>
+      <div class="disc-mini-label">PWD</div>
+      <div class="disc-mini-amt">−${pesos(discBreak.pwd.amt)}</div>
+      <div class="disc-mini-count">${discBreak.pwd.count} tx</div>
+    </div>
+    <div class="disc-mini-card">
+      <div class="disc-mini-icon">🏷</div>
+      <div class="disc-mini-label">Manager</div>
+      <div class="disc-mini-amt">−${pesos(discBreak.manager.amt)}</div>
+      <div class="disc-mini-count">${discBreak.manager.count} tx</div>
+    </div>`;
+
+  // Payment bars
+  const maxPay = Math.max(...Object.values(payTotals), 1);
+  const payColors = { cash:'#9DCF46', gcash:'#52C3E3', maya:'#7C3AED' };
+  const payLabels = { cash:'💵 Cash', gcash:'📱 GCash', maya:'💳 Maya' };
+  document.getElementById('ss-pay-bars').innerHTML = Object.entries(payTotals).map(([key,amt])=>{
+    const pct = netSales > 0 ? ((amt/netSales)*100).toFixed(1) : 0;
+    const width = maxPay > 0 ? (amt/maxPay*100) : 0;
+    return `<div class="pay-bar-row">
+      <div class="pay-bar-label">${payLabels[key]}</div>
+      <div class="pay-bar-track"><div class="pay-bar-fill" style="width:${width}%;background:${payColors[key]}"></div></div>
+      <div class="pay-bar-amt">${pesos(amt)}</div>
+      <div class="pay-bar-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Top products
+  const rankClasses = ['gold','silver','bronze'];
+  document.getElementById('ss-top-products').innerHTML = topProds.length
+    ? topProds.map((p,i)=>`
+      <div class="top-prod-row">
+        <div class="top-prod-rank ${rankClasses[i]||''}">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div class="top-prod-name">${p.name}</div>
+          <div class="top-prod-cat">${p.cat}</div>
+        </div>
+        <div class="top-prod-qty">${p.qty} sold</div>
+        <div class="top-prod-rev">${pesos(p.rev)}</div>
+      </div>`).join('')
+    : '<div style="padding:20px;text-align:center;color:var(--slate400);font-size:13px">No transactions yet</div>';
+
+  // Cashier performance
+  document.getElementById('ss-cashier-perf').innerHTML = cashiers.length
+    ? cashiers.map(c=>`
+      <div class="cashier-perf-row">
+        <div class="cashier-av" style="background:${c.color}">${c.initials}</div>
+        <div class="cashier-perf-info">
+          <div class="cashier-perf-name">${c.name}</div>
+          <div class="cashier-perf-sub">Avg basket ${pesos(c.count?c.total/c.count:0)} · Discounts given ${pesos(c.disc)}</div>
+        </div>
+        <div class="cashier-perf-stats">
+          <div class="cashier-perf-total">${pesos(c.total)}</div>
+          <div class="cashier-perf-txcount">${c.count} transaction${c.count!==1?'s':''}</div>
+        </div>
+      </div>`).join('')
+    : '<div style="padding:20px;text-align:center;color:var(--slate400);font-size:13px">No transactions yet</div>';
+
+  // ── Pharmacist performance ──
+  const pharmMap = {};
+  let untaggedCount = 0;
+  tx.forEach(t=>{
+    if (!t.pharmacist) { untaggedCount++; return; }
+    const k = t.pharmacist;
+    if (!pharmMap[k]) {
+      const reg = REGISTERED_USERS.find(u=>u.name===k);
+      pharmMap[k] = {
+        name: k,
+        color: reg ? reg.color : '#9333EA',
+        initials: reg ? reg.initials : k.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),
+        total: 0, count: 0, items: 0, discAmt: 0,
+      };
+    }
+    pharmMap[k].total   += t.total;
+    pharmMap[k].count++;
+    pharmMap[k].items   += t.items.reduce((s,i)=>s+i.qty, 0);
+    pharmMap[k].discAmt += t.discAmt;
+  });
+  const pharms = Object.values(pharmMap).sort((a,b)=>b.total-a.total);
+  const topPharmTotal = pharms[0]?.total || 1;
+  const pharmNetTotal = pharms.reduce((s,p)=>s+p.total, 0);
+
+  const untaggedNote = untaggedCount > 0
+    ? `<div style="padding:10px 16px;font-size:11px;color:var(--slate400);border-top:1px solid var(--slate100)">
+        ⚠ ${untaggedCount} transaction${untaggedCount!==1?'s':''} not linked to a pharmacist (direct POS sales)
+       </div>`
+    : '';
+
+  document.getElementById('ss-pharmacist-perf').innerHTML = pharms.length
+    ? pharms.map((p, i)=>{
+        const shareOfTagged = pharmNetTotal > 0 ? ((p.total/pharmNetTotal)*100).toFixed(1) : 0;
+        const barW = (p.total/topPharmTotal*100).toFixed(1);
+        const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+        return `<div class="cashier-perf-row" style="flex-direction:column;align-items:stretch;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="cashier-av" style="background:${p.color};position:relative;flex-shrink:0">
+              ${p.initials}
+              ${medal?`<span style="position:absolute;top:-6px;right:-6px;font-size:13px">${medal}</span>`:''}
+            </div>
+            <div class="cashier-perf-info">
+              <div class="cashier-perf-name">${p.name}</div>
+              <div class="cashier-perf-sub">${p.count} order${p.count!==1?'s':''} · ${p.items} units dispensed · Avg ${pesos(p.count?p.total/p.count:0)}</div>
+            </div>
+            <div class="cashier-perf-stats">
+              <div class="cashier-perf-total">${pesos(p.total)}</div>
+              <div class="cashier-perf-txcount">${shareOfTagged}% of pharmacist sales</div>
+            </div>
+          </div>
+          <div style="padding:0 42px 4px;display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:8px;background:var(--slate100);border-radius:4px;overflow:hidden">
+              <div style="height:100%;width:${barW}%;background:${p.color};border-radius:4px;opacity:.85;transition:width .7s cubic-bezier(.4,0,.2,1)"></div>
+            </div>
+            <span style="font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--slate400);width:36px;text-align:right">${barW}%</span>
+          </div>
+        </div>`;
+      }).join('') + untaggedNote
+    : '<div style="padding:20px;text-align:center;color:var(--slate400);font-size:13px">No pharmacist-tagged orders yet</div>';
 }
 
 /* ── TRANSACTION LOG ──────────────────────── */
@@ -2333,8 +3572,11 @@ window.renderTxLog = function() {
 
   // Transaction rows (expandable)
   document.getElementById('txlog-tbody').innerHTML = filtered.map((t,i)=>{
-    const discLabel = t.disc==='senior'?'<span class="chip chip-blue">Senior 20%</span>':t.disc==='pwd'?'<span class="chip chip-amber">PWD 20%</span>':'—';
+    const discLabel = t.disc==='senior'?'<span class="chip chip-blue">Senior 20%</span>':t.disc==='pwd'?'<span class="chip chip-amber">PWD 20%</span>':t.disc==='manager'?`<span class="chip" style="background:#F5F0FF;color:#6B21A8">🏷 Manager ${t.mgrPct||''}%</span>`:'—';
     const payLabel = t.pay==='cash'?'💵 Cash':t.pay==='gcash'?'📱 GCash':'💳 Maya';
+    const pharmacistCell = t.pharmacist
+      ? `<span style="font-size:12px;font-weight:500;color:var(--slate600)">${t.pharmacist}</span>`
+      : `<span style="color:var(--slate300);font-size:11px">—</span>`;
     const itemLines = t.items.map(it=>`
       <div class="txlog-item-line">
         <span>${it.name} ×${it.qty}</span>
@@ -2349,6 +3591,7 @@ window.renderTxLog = function() {
             <span style="font-weight:600">${t.emp}</span>
           </div>
         </td>
+        <td>${pharmacistCell}</td>
         <td style="color:var(--slate400);font-size:12px">${t.time}</td>
         <td style="color:var(--slate500)">${t.items.length} item${t.items.length!==1?'s':''}</td>
         <td>${discLabel}</td>
@@ -2356,7 +3599,7 @@ window.renderTxLog = function() {
         <td class="td-mono" style="font-weight:800;color:var(--g600)">${pesos(t.total)}</td>
       </tr>
       <tr class="txlog-expand-row" id="txexp-${i}" style="display:none">
-        <td colspan="8">
+        <td colspan="9">
           <div class="txlog-items-list">
             ${itemLines}
             ${t.disc!=='none'?`<div class="txlog-item-line" style="color:var(--blue);margin-top:4px"><span>${t.disc==='senior'?'Senior Citizen':'PWD'} Discount (20%)</span><span style="font-family:var(--font-mono);font-weight:700">−${pesos(t.discAmt)}</span></div>`:''}
@@ -2364,7 +3607,7 @@ window.renderTxLog = function() {
           </div>
         </td>
       </tr>`;
-  }).join('') || `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--slate400)">No transactions found</td></tr>`;
+  }).join('') || `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--slate400)">No transactions found</td></tr>`;
 };
 
 window.toggleTxRow = function(expandId, row) {
@@ -2382,9 +3625,9 @@ function renderInv(list) {
     const stock = totalStock(p);
     const b = fefo(p)||p.batches[0];
     const d = b ? daysLeft(b.exp) : 9999;
-    const sc = stock===0?'chip-red':stock<=20?'chip-amber':'chip-green';
-    const sl = stock===0?'Out of Stock':stock<=20?'Low ('+stock+')':'In Stock ('+stock+')';
-    const expStyle = d<=30?'color:var(--red);font-weight:700':d<=60?'color:var(--amber);font-weight:600':'color:var(--slate500)';
+    const sc = stock < 0?'chip-red':stock===0?'chip-amber':stock<=20?'chip-amber':'chip-green';
+    const sl = stock < 0?`Backordered (${stock})`:stock===0?'Out of Stock':stock<=20?'Low ('+stock+')':'In Stock ('+stock+')';
+    const expStyle = d<=180?'color:var(--red);font-weight:700':d<=270?'color:var(--amber);font-weight:600':'color:var(--slate500)';
     return `<tr>
       <td><div class="td-name">${p.name}</div><div class="td-sub">${p.generic}</div></td>
       <td>${p.cat}</td>
@@ -2410,7 +3653,7 @@ function renderExpiry(filter) {
   PRODUCTS.forEach(p=>{
     p.batches.forEach(b=>{
       const d = daysLeft(b.exp);
-      const status = d<=0?'expired':d<=30?'crit':d<=60?'warn':'ok';
+      const status = d<=0?'expired':d<=180?'crit':d<=270?'warn':'ok';
       rows.push({ pname:p.name, batch:b.id, exp:b.exp, days:d, qty:b.qty, status });
     });
   });
@@ -2444,6 +3687,10 @@ window.setExpiryFilter = function(f, el) {
 
 /* ── ATTENDANCE ────────────────────────────── */
 function renderEmpGrid() {
+  const isAdmin = currentUser.role === 'Admin';
+  // Show/hide admin hint on shift log
+  const hint = document.getElementById('shift-log-admin-hint');
+  if (hint) hint.style.display = isAdmin ? 'block' : 'none';
   document.getElementById('emp-grid').innerHTML = EMPLOYEES.map(e=>{
     const statusText = e.timeOut?'Clocked Out':e.onBreak?'On Break':e.timeIn?'Clocked In':'Not In';
     const dotClass = e.timeOut?'out':e.onBreak?'break':e.timeIn?'in':'out';
@@ -2458,6 +3705,9 @@ function renderEmpGrid() {
     } else {
       btns = `<button class="emp-btn in full" onclick="empAction('${e.id}','in')">Time In</button>`;
     }
+    const editBtn = isAdmin
+      ? `<button class="emp-edit-time-btn" onclick="openEditTime('${e.id}')">✏️ Edit Time</button>`
+      : '';
     return `<div class="emp-card">
       <div class="emp-card-head">
         <div class="emp-av" style="background:${e.color}">${e.initials}</div>
@@ -2466,21 +3716,66 @@ function renderEmpGrid() {
       <div class="emp-status-row"><div class="s-dot ${dotClass}"></div>${statusText}</div>
       <div class="emp-time">${e.timeIn?'In: '+e.timeIn:' — '}${e.timeOut?' · Out: '+e.timeOut:''}</div>
       <div class="emp-btns">${btns}</div>
+      ${editBtn}
     </div>`;
   }).join('');
 
   document.getElementById('shift-log-tbody').innerHTML = EMPLOYEES.filter(e=>e.timeIn).map(e=>{
     const hrs = e.timeOut ? calcHrs(e.timeIn,e.timeOut) : '<span style="color:var(--g500)">Active</span>';
-    return `<tr>
-      <td><strong>${e.name}</strong></td>
+    const isAdmin = currentUser.role === 'Admin';
+    const rowStyle = isAdmin ? 'cursor:pointer' : '';
+    const rowClick = isAdmin ? `onclick="openEditTime('${e.id}')"` : '';
+    const editHint = isAdmin ? `<span class="shift-log-edit-hint">✏️</span>` : '';
+    return `<tr class="shift-log-row" style="${rowStyle}" ${rowClick}>
+      <td><strong>${e.name}</strong> ${editHint}</td>
       <td style="color:var(--slate500)">${e.role}</td>
       <td class="td-mono">${e.timeIn}</td>
-      <td class="td-mono" style="color:var(--amber)">${e.onBreak?'Now':'—'}</td>
+      <td class="td-mono" style="color:var(--amber)">${e.onBreak?'Now':e.breakOut||'—'}</td>
       <td class="td-mono">${e.timeOut||'—'}</td>
       <td class="td-mono" style="font-weight:700;color:var(--g600)">${hrs}</td>
     </tr>`;
   }).join('');
 }
+
+let editingEmpId = null;
+
+window.openEditTime = function(id) {
+  const e = EMPLOYEES.find(x=>x.id===id);
+  if (!e) return;
+  editingEmpId = id;
+  // Populate modal
+  document.getElementById('et-av').textContent = e.initials;
+  document.getElementById('et-av').style.background = e.color;
+  document.getElementById('et-name').textContent = e.name;
+  document.getElementById('et-role').textContent = e.role;
+  document.getElementById('et-timein').value    = e.timeIn    || '';
+  document.getElementById('et-timeout').value   = e.timeOut   || '';
+  document.getElementById('et-breakout').value  = e.breakOut  || '';
+  document.getElementById('et-breakin').value   = e.breakIn   || '';
+  openOverlay('ov-edit-time');
+};
+
+window.saveEditTime = function() {
+  const e = EMPLOYEES.find(x=>x.id===editingEmpId);
+  if (!e) return;
+  const timeIn   = document.getElementById('et-timein').value;
+  const timeOut  = document.getElementById('et-timeout').value;
+  const breakOut = document.getElementById('et-breakout').value;
+  const breakIn  = document.getElementById('et-breakin').value;
+  // Validate: timeIn required if timeOut set
+  if (timeOut && !timeIn) { toast('Time In is required if Time Out is set','error'); return; }
+  if (breakIn && !breakOut) { toast('Break Start is required if Break End is set','error'); return; }
+  // Apply changes
+  e.timeIn   = timeIn   || null;
+  e.timeOut  = timeOut  || null;
+  e.breakOut = breakOut || null;
+  e.breakIn  = breakIn  || null;
+  e.onBreak  = !!(breakOut && !breakIn);
+  closeOverlay('ov-edit-time');
+  renderEmpGrid();
+  toast(`${e.name}'s shift times updated`, 'success');
+  editingEmpId = null;
+};
 
 function calcHrs(tin,tout) {
   const [h1,m1]=tin.split(':').map(Number);
@@ -2514,7 +3809,12 @@ window.doSync = function() {
 function openOverlay(id) { document.getElementById(id).classList.add('open'); }
 window.closeOverlay = function(id) { document.getElementById(id).classList.remove('open'); };
 document.querySelectorAll('.overlay').forEach(ov=>{
-  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('open'); });
+  ov.addEventListener('click', e=>{
+    if (e.target !== ov) return;
+    // Don't close cashier-process if CPV PIN modal is open on top
+    if (ov.id === 'ov-cashier-process' && document.getElementById('ov-cashier-pin').classList.contains('open')) return;
+    ov.classList.remove('open');
+  });
 });
 
 /* ── TOAST ─────────────────────────────────── */
