@@ -1719,6 +1719,13 @@ input, select, button, textarea { font-family: var(--font-body); }
     <button class="topbar-menu-btn" onclick="toggleSidebar()">☰</button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
     <div class="topbar-date" id="topbar-date"></div>
+    <!-- Shift indicator chip -->
+    <div id="shift-chip" style="
+      display:inline-flex;align-items:center;gap:5px;
+      padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;
+      background:#E8F5EE;color:#2E7D4F;border:1.5px solid #A7D7B8;
+      font-family:var(--font-display);flex-shrink:0;
+    ">🌅 Morning Shift</div>
     <div class="topbar-switch-btn" id="topbar-switch-btn" onclick="showLock()" title="Switch cashier">
       <div class="topbar-switch-av" id="topbar-switch-av" style="background:#2196A8">AR</div>
       <span class="topbar-switch-name" id="topbar-switch-name">Ana Reyes</span>
@@ -1947,6 +1954,10 @@ input, select, button, textarea { font-family: var(--font-body); }
         <button class="ss-period-btn" onclick="setSsPeriod('week',this)">This Week</button>
         <button class="ss-period-btn active" onclick="setSsPeriod('month',this)">This Month</button>
         <button class="ss-period-btn" onclick="setSsPeriod('all',this)">All Time</button>
+        <div style="width:1px;background:var(--slate200);margin:0 4px;align-self:stretch"></div>
+        <button class="ss-period-btn" id="ss-shift-all"     onclick="setSsShift('all',this)"     style="border-color:#9333EA22">☀️🌙 All Shifts</button>
+        <button class="ss-period-btn" id="ss-shift-morning" onclick="setSsShift('morning',this)" style="border-color:#9DCF4644">🌅 Morning</button>
+        <button class="ss-period-btn" id="ss-shift-afternoon" onclick="setSsShift('afternoon',this)" style="border-color:#52C3E344">🌆 Afternoon</button>
         <button class="ss-export-btn" onclick="toast('Sales Summary exported to Excel','success')">📥 Export</button>
       </div>
       <!-- Hero metrics -->
@@ -2045,6 +2056,11 @@ input, select, button, textarea { font-family: var(--font-body); }
           <option value="all">All Transactions</option>
           <option value="done">Completed</option>
           <option value="voided">Voided</option>
+        </select>
+        <select class="txlog-filter-select" id="txlog-shift-filter" onchange="renderTxLog()">
+          <option value="all">All Shifts</option>
+          <option value="morning">🌅 Morning Shift</option>
+          <option value="afternoon">🌆 Afternoon Shift</option>
         </select>
         <button class="btn btn-ghost btn-sm" onclick="toast('Transaction log exported to Excel','success')">📥 Export</button>
       </div>
@@ -2393,40 +2409,40 @@ let cpvContext = 'queue';   // 'queue' | 'cashier' — what happens after PIN
 let voidTargetTxNum = null; // transaction number being voided
 let txLog = [
   // ── TODAY (Jun 29, 2026) ──
-  { txNum:'#TX-0030', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:52 AM', items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:1200, discAmt:240,   total:960 },
-  { txNum:'#TX-0029', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:31 AM', items:[{name:'Amoxicillin 500mg',qty:14,price:12},{name:'Paracetamol 500mg',qty:20,price:4}], disc:'none', mgrPct:null, pay:'gcash', subtotal:248, discAmt:0,     total:248 },
-  { txNum:'#TX-0028', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:08 AM', items:[{name:'Cetirizine 10mg',qty:10,price:9},{name:'Salbutamol 2mg',qty:10,price:3.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:125, discAmt:0,     total:125 },
-  { txNum:'#TX-0027', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 9:45 AM',  items:[{name:'Omeprazole 20mg',qty:14,price:14},{name:'Ascorbic Acid 500mg',qty:30,price:5}], disc:'pwd', mgrPct:null, pay:'maya',  subtotal:346, discAmt:69.20, total:276.80 },
-  { txNum:'#TX-0026', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 9:20 AM',  items:[{name:'Biogesic 500mg',qty:20,price:6.50},{name:'Mefenamic Acid 500mg',qty:10,price:8.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:215, discAmt:0,     total:215 },
-  { txNum:'#TX-0025', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 8:55 AM',  items:[{name:'Metformin 500mg',qty:60,price:7},{name:'Losartan 50mg',qty:30,price:18}], disc:'manager', mgrPct:15, pay:'cash',  subtotal:960, discAmt:144,   total:816 },
-  { txNum:'#TX-0024', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 8:30 AM',  items:[{name:'Paracetamol 500mg',qty:30,price:4},{name:'Ascorbic Acid 500mg',qty:30,price:5}], disc:'none', mgrPct:null, pay:'gcash', subtotal:270, discAmt:0,     total:270 },
+  { txNum:'#TX-0030', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:52 AM', shift:'morning', items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:1200, discAmt:240,   total:960 },
+  { txNum:'#TX-0029', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:31 AM', shift:'morning', items:[{name:'Amoxicillin 500mg',qty:14,price:12},{name:'Paracetamol 500mg',qty:20,price:4}], disc:'none', mgrPct:null, pay:'gcash', subtotal:248, discAmt:0,     total:248 },
+  { txNum:'#TX-0028', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 10:08 AM', shift:'morning', items:[{name:'Cetirizine 10mg',qty:10,price:9},{name:'Salbutamol 2mg',qty:10,price:3.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:125, discAmt:0,     total:125 },
+  { txNum:'#TX-0027', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 9:45 AM', shift:'morning',  items:[{name:'Omeprazole 20mg',qty:14,price:14},{name:'Ascorbic Acid 500mg',qty:30,price:5}], disc:'pwd', mgrPct:null, pay:'maya',  subtotal:346, discAmt:69.20, total:276.80 },
+  { txNum:'#TX-0026', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 9:20 AM', shift:'morning',  items:[{name:'Biogesic 500mg',qty:20,price:6.50},{name:'Mefenamic Acid 500mg',qty:10,price:8.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:215, discAmt:0,     total:215 },
+  { txNum:'#TX-0025', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 8:55 AM', shift:'morning',  items:[{name:'Metformin 500mg',qty:60,price:7},{name:'Losartan 50mg',qty:30,price:18}], disc:'manager', mgrPct:15, pay:'cash',  subtotal:960, discAmt:144,   total:816 },
+  { txNum:'#TX-0024', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz', time:'Jun 29, 2026, 8:30 AM', shift:'morning',  items:[{name:'Paracetamol 500mg',qty:30,price:4},{name:'Ascorbic Acid 500mg',qty:30,price:5}], disc:'none', mgrPct:null, pay:'gcash', subtotal:270, discAmt:0,     total:270 },
 
   // ── THIS WEEK (Jun 23–28) ──
-  { txNum:'#TX-0023', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 28, 2026, 3:15 PM',  items:[{name:'Amoxicillin 500mg',qty:21,price:12},{name:'Cetirizine 10mg',qty:14,price:9}], disc:'none', mgrPct:null, pay:'cash',  subtotal:378, discAmt:0,     total:378 },
-  { txNum:'#TX-0022', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 28, 2026, 1:40 PM',  items:[{name:'Mefenamic Acid 500mg',qty:20,price:8.50}], disc:'senior', mgrPct:null, pay:'gcash', subtotal:170, discAmt:34,    total:136 },
-  { txNum:'#TX-0021', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 28, 2026, 11:05 AM', items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Metformin 500mg',qty:60,price:7}], disc:'none', mgrPct:null, pay:'maya',  subtotal:812, discAmt:0,     total:812 },
-  { txNum:'#TX-0020', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 27, 2026, 4:22 PM',  items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:990, discAmt:198,   total:792 },
-  { txNum:'#TX-0019', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 27, 2026, 2:10 PM',  items:[{name:'Amoxicillin 500mg',qty:7,price:12},{name:'Biogesic 500mg',qty:10,price:6.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:149, discAmt:0,     total:149 },
-  { txNum:'#TX-0018', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 27, 2026, 10:48 AM', items:[{name:'Paracetamol 500mg',qty:60,price:4},{name:'Ascorbic Acid 500mg',qty:60,price:5}], disc:'none', mgrPct:null, pay:'gcash', subtotal:540, discAmt:0,     total:540 },
-  { txNum:'#TX-0017', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 26, 2026, 5:30 PM',  items:[{name:'Cloxacillin 500mg',qty:21,price:22},{name:'Mefenamic Acid 500mg',qty:10,price:8.50}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:547, discAmt:109.40,total:437.60 },
-  { txNum:'#TX-0016', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 26, 2026, 3:15 PM',  items:[{name:'Salbutamol 2mg',qty:30,price:3.50},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'none', mgrPct:null, pay:'maya',  subtotal:375, discAmt:0,     total:375 },
-  { txNum:'#TX-0015', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Josie Bautista',   time:'Jun 26, 2026, 1:00 PM',  items:[{name:'Omeprazole 20mg',qty:14,price:14},{name:'Losartan 50mg',qty:30,price:18}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:736, discAmt:147.20,total:588.80 },
-  { txNum:'#TX-0014', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 25, 2026, 6:28 AM',  items:[{name:'Amoxicillin 500mg',qty:2,price:12},{name:'Paracetamol 500mg',qty:10,price:4},{name:'Cetirizine 10mg',qty:5,price:9}], disc:'none', mgrPct:null, pay:'cash',  subtotal:109, discAmt:0,     total:109 },
-  { txNum:'#TX-0013', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 25, 2026, 6:14 AM',  items:[{name:'Mefenamic Acid 500mg',qty:4,price:8.50}], disc:'senior', mgrPct:null, pay:'gcash', subtotal:34,  discAmt:6.80,  total:27.20 },
-  { txNum:'#TX-0012', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 25, 2026, 5:58 AM',  items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:10,price:15}], disc:'none', mgrPct:null, pay:'maya',  subtotal:840, discAmt:0,     total:840 },
-  { txNum:'#TX-0011', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Josie Bautista',   time:'Jun 25, 2026, 5:44 AM',  items:[{name:'Amoxicillin 500mg',qty:8,price:12},{name:'Ascorbic Acid 500mg',qty:10,price:5}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:146, discAmt:29.20, total:116.80 },
-  { txNum:'#TX-0010', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 24, 2026, 4:50 PM',  items:[{name:'Biogesic 500mg',qty:30,price:6.50},{name:'Paracetamol 500mg',qty:30,price:4}], disc:'none', mgrPct:null, pay:'gcash', subtotal:315, discAmt:0,     total:315 },
-  { txNum:'#TX-0009', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Maria Santos',  time:'Jun 24, 2026, 2:30 PM',  items:[{name:'Metformin 500mg',qty:60,price:7},{name:'Losartan 50mg',qty:60,price:18}], disc:'manager', mgrPct:10, pay:'cash',  subtotal:1500, discAmt:150,  total:1350 },
-  { txNum:'#TX-0008', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 23, 2026, 3:45 PM',  items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'none', mgrPct:null, pay:'maya',  subtotal:662, discAmt:0,     total:662 },
-  { txNum:'#TX-0007', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 23, 2026, 1:20 PM',  items:[{name:'Amoxicillin 500mg',qty:14,price:12},{name:'Cloxacillin 500mg',qty:7,price:22}], disc:'none', mgrPct:null, pay:'cash',  subtotal:322, discAmt:0,     total:322 },
+  { txNum:'#TX-0023', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 28, 2026, 3:15 PM', shift:'afternoon',  items:[{name:'Amoxicillin 500mg',qty:21,price:12},{name:'Cetirizine 10mg',qty:14,price:9}], disc:'none', mgrPct:null, pay:'cash',  subtotal:378, discAmt:0,     total:378 },
+  { txNum:'#TX-0022', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 28, 2026, 1:40 PM', shift:'morning',  items:[{name:'Mefenamic Acid 500mg',qty:20,price:8.50}], disc:'senior', mgrPct:null, pay:'gcash', subtotal:170, discAmt:34,    total:136 },
+  { txNum:'#TX-0021', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 28, 2026, 11:05 AM', shift:'morning', items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Metformin 500mg',qty:60,price:7}], disc:'none', mgrPct:null, pay:'maya',  subtotal:812, discAmt:0,     total:812 },
+  { txNum:'#TX-0020', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 27, 2026, 4:22 PM', shift:'afternoon',  items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Amlodipine 5mg',qty:30,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:990, discAmt:198,   total:792 },
+  { txNum:'#TX-0019', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 27, 2026, 2:10 PM', shift:'afternoon',  items:[{name:'Amoxicillin 500mg',qty:7,price:12},{name:'Biogesic 500mg',qty:10,price:6.50}], disc:'none', mgrPct:null, pay:'cash',  subtotal:149, discAmt:0,     total:149 },
+  { txNum:'#TX-0018', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 27, 2026, 10:48 AM', shift:'morning', items:[{name:'Paracetamol 500mg',qty:60,price:4},{name:'Ascorbic Acid 500mg',qty:60,price:5}], disc:'none', mgrPct:null, pay:'gcash', subtotal:540, discAmt:0,     total:540 },
+  { txNum:'#TX-0017', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 26, 2026, 5:30 PM', shift:'afternoon',  items:[{name:'Cloxacillin 500mg',qty:21,price:22},{name:'Mefenamic Acid 500mg',qty:10,price:8.50}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:547, discAmt:109.40,total:437.60 },
+  { txNum:'#TX-0016', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 26, 2026, 3:15 PM', shift:'afternoon',  items:[{name:'Salbutamol 2mg',qty:30,price:3.50},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'none', mgrPct:null, pay:'maya',  subtotal:375, discAmt:0,     total:375 },
+  { txNum:'#TX-0015', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Josie Bautista',   time:'Jun 26, 2026, 1:00 PM', shift:'morning',  items:[{name:'Omeprazole 20mg',qty:14,price:14},{name:'Losartan 50mg',qty:30,price:18}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:736, discAmt:147.20,total:588.80 },
+  { txNum:'#TX-0014', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 25, 2026, 6:28 AM', shift:'morning',  items:[{name:'Amoxicillin 500mg',qty:2,price:12},{name:'Paracetamol 500mg',qty:10,price:4},{name:'Cetirizine 10mg',qty:5,price:9}], disc:'none', mgrPct:null, pay:'cash',  subtotal:109, discAmt:0,     total:109 },
+  { txNum:'#TX-0013', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 25, 2026, 6:14 AM', shift:'morning',  items:[{name:'Mefenamic Acid 500mg',qty:4,price:8.50}], disc:'senior', mgrPct:null, pay:'gcash', subtotal:34,  discAmt:6.80,  total:27.20 },
+  { txNum:'#TX-0012', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Maria Santos',   time:'Jun 25, 2026, 5:58 AM', shift:'afternoon',  items:[{name:'Losartan 50mg',qty:30,price:18},{name:'Metformin 500mg',qty:30,price:7},{name:'Amlodipine 5mg',qty:10,price:15}], disc:'none', mgrPct:null, pay:'maya',  subtotal:840, discAmt:0,     total:840 },
+  { txNum:'#TX-0011', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Josie Bautista',   time:'Jun 25, 2026, 5:44 AM', shift:'afternoon',  items:[{name:'Amoxicillin 500mg',qty:8,price:12},{name:'Ascorbic Acid 500mg',qty:10,price:5}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:146, discAmt:29.20, total:116.80 },
+  { txNum:'#TX-0010', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 24, 2026, 4:50 PM', shift:'afternoon',  items:[{name:'Biogesic 500mg',qty:30,price:6.50},{name:'Paracetamol 500mg',qty:30,price:4}], disc:'none', mgrPct:null, pay:'gcash', subtotal:315, discAmt:0,     total:315 },
+  { txNum:'#TX-0009', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Maria Santos',  time:'Jun 24, 2026, 2:30 PM', shift:'afternoon',  items:[{name:'Metformin 500mg',qty:60,price:7},{name:'Losartan 50mg',qty:60,price:18}], disc:'manager', mgrPct:10, pay:'cash',  subtotal:1500, discAmt:150,  total:1350 },
+  { txNum:'#TX-0008', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 23, 2026, 3:45 PM', shift:'afternoon',  items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'none', mgrPct:null, pay:'maya',  subtotal:662, discAmt:0,     total:662 },
+  { txNum:'#TX-0007', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 23, 2026, 1:20 PM', shift:'morning',  items:[{name:'Amoxicillin 500mg',qty:14,price:12},{name:'Cloxacillin 500mg',qty:7,price:22}], disc:'none', mgrPct:null, pay:'cash',  subtotal:322, discAmt:0,     total:322 },
 
   // ── EARLIER THIS MONTH (Jun 1–22) ──
-  { txNum:'#TX-0006', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 20, 2026, 11:30 AM', items:[{name:'Losartan 50mg',qty:60,price:18},{name:'Metformin 500mg',qty:60,price:7},{name:'Amlodipine 5mg',qty:60,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:2400, discAmt:480,  total:1920 },
-  { txNum:'#TX-0005', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Josie Bautista',  time:'Jun 15, 2026, 2:00 PM',  items:[{name:'Ascorbic Acid 500mg',qty:100,price:5},{name:'Biogesic 500mg',qty:50,price:6.50}], disc:'none', mgrPct:null, pay:'gcash', subtotal:825, discAmt:0,     total:825 },
-  { txNum:'#TX-0004', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 10, 2026, 9:15 AM',  items:[{name:'Paracetamol 500mg',qty:100,price:4},{name:'Mefenamic Acid 500mg',qty:50,price:8.50}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:825, discAmt:165,   total:660 },
-  { txNum:'#TX-0003', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Josie Bautista',   time:'Jun 5, 2026, 10:00 AM',  items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Salbutamol 2mg',qty:30,price:3.50}], disc:'none', mgrPct:null, pay:'maya',  subtotal:497, discAmt:0,     total:497 },
-  { txNum:'#TX-0002', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 3, 2026, 3:30 PM',   items:[{name:'Amoxicillin 500mg',qty:28,price:12},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'manager', mgrPct:20, pay:'gcash', subtotal:606, discAmt:121.20,total:484.80 },
-  { txNum:'#TX-0001', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 1, 2026, 8:00 AM',   items:[{name:'Metformin 500mg',qty:90,price:7},{name:'Losartan 50mg',qty:90,price:18}], disc:'none', mgrPct:null, pay:'cash',  subtotal:2250, discAmt:0,    total:2250 },
+  { txNum:'#TX-0006', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Rodel Cruz',     time:'Jun 20, 2026, 11:30 AM', shift:'morning', items:[{name:'Losartan 50mg',qty:60,price:18},{name:'Metformin 500mg',qty:60,price:7},{name:'Amlodipine 5mg',qty:60,price:15}], disc:'senior', mgrPct:null, pay:'cash',  subtotal:2400, discAmt:480,  total:1920 },
+  { txNum:'#TX-0005', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Josie Bautista',  time:'Jun 15, 2026, 2:00 PM', shift:'afternoon',  items:[{name:'Ascorbic Acid 500mg',qty:100,price:5},{name:'Biogesic 500mg',qty:50,price:6.50}], disc:'none', mgrPct:null, pay:'gcash', subtotal:825, discAmt:0,     total:825 },
+  { txNum:'#TX-0004', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Rodel Cruz',     time:'Jun 10, 2026, 9:15 AM', shift:'morning',  items:[{name:'Paracetamol 500mg',qty:100,price:4},{name:'Mefenamic Acid 500mg',qty:50,price:8.50}], disc:'pwd', mgrPct:null, pay:'cash',  subtotal:825, discAmt:165,   total:660 },
+  { txNum:'#TX-0003', emp:'Ana Reyes',      empColor:'#2196A8', empInitials:'AR', pharmacist:'Josie Bautista',   time:'Jun 5, 2026, 10:00 AM', shift:'morning',  items:[{name:'Omeprazole 20mg',qty:28,price:14},{name:'Salbutamol 2mg',qty:30,price:3.50}], disc:'none', mgrPct:null, pay:'maya',  subtotal:497, discAmt:0,     total:497 },
+  { txNum:'#TX-0002', emp:'Lea Dimaculangan',empColor:'#607D8B', empInitials:'LD', pharmacist:'Rodel Cruz',    time:'Jun 3, 2026, 3:30 PM', shift:'afternoon',   items:[{name:'Amoxicillin 500mg',qty:28,price:12},{name:'Cetirizine 10mg',qty:30,price:9}], disc:'manager', mgrPct:20, pay:'gcash', subtotal:606, discAmt:121.20,total:484.80 },
+  { txNum:'#TX-0001', emp:'Rodel Cruz',     empColor:'#9333EA', empInitials:'RC', pharmacist:'Maria Santos',   time:'Jun 1, 2026, 8:00 AM', shift:'morning',   items:[{name:'Metformin 500mg',qty:90,price:7},{name:'Losartan 50mg',qty:90,price:18}], disc:'none', mgrPct:null, pay:'cash',  subtotal:2250, discAmt:0,    total:2250 },
 ];
 
 const REGISTERED_USERS = [
@@ -2996,6 +3012,7 @@ window.confirmPay = function() {
   txLog.unshift({
     txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
     time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
+    shift: getShift(new Date()),
     items: cart.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
     disc: discType, mgrPct: discType==='manager'?managerDiscPct:null,
     pay: payMethod, subtotal, discAmt, total,
@@ -3453,6 +3470,7 @@ window.confirmPay = function() {
       txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
       pharmacist: o.pharmacist.name,
       time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
+      shift: getShift(new Date()),
       items: o.items.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
       disc: o.disc, mgrPct: o.mgrPct||null, pay: cpPayMethod,
       subtotal: o.subtotal, discAmt: o.discAmt, total: o.total,
@@ -3480,6 +3498,7 @@ window.confirmPay = function() {
     txLog.unshift({
       txNum, emp: cashier.name, empColor: cashier.color, empInitials: cashier.initials,
       time: new Date().toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}),
+      shift: getShift(new Date()),
       items: cart.map(c=>({ name:c.name, qty:c.qty, price:c.price })),
       disc: discType, pay: payMethod, subtotal, discAmt, total,
     });
@@ -3511,6 +3530,41 @@ function buildQueueReceipt(txNum, o, tendered, cashier) {
 
 /* ── SALES SUMMARY ───────────────────────── */
 let ssPeriod = 'month';
+let ssShift  = 'all'; // 'all' | 'morning' | 'afternoon'
+
+// Shift definitions — Morning: 6:00–13:59, Afternoon: 14:00–23:59
+const SHIFTS = {
+  morning:   { label: '🌅 Morning Shift',   start: 6,  end: 14 },
+  afternoon: { label: '🌆 Afternoon Shift',  start: 14, end: 24 },
+};
+
+function getShift(dateOrStr) {
+  const d = dateOrStr instanceof Date ? dateOrStr : new Date(dateOrStr);
+  const h = isNaN(d) ? new Date().getHours() : d.getHours();
+  return h >= 6 && h < 14 ? 'morning' : 'afternoon';
+}
+
+function updateShiftChip() {
+  const shift = getShift(new Date());
+  const chip = document.getElementById('shift-chip');
+  if (!chip) return;
+  if (shift === 'morning') {
+    chip.textContent = '🌅 Morning Shift';
+    chip.style.background = '#E8F5EE'; chip.style.color = '#2E7D4F';
+    chip.style.borderColor = '#A7D7B8';
+  } else {
+    chip.textContent = '🌆 Afternoon Shift';
+    chip.style.background = '#EEF9FD'; chip.style.color = '#1E6F8F';
+    chip.style.borderColor = '#A3DCF0';
+  }
+}
+
+window.setSsShift = function(s, el) {
+  ssShift = s;
+  document.querySelectorAll('[id^="ss-shift-"]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderSalesSummary();
+};
 
 window.setSsPeriod = function(p, el) {
   ssPeriod = p;
@@ -3522,17 +3576,16 @@ window.setSsPeriod = function(p, el) {
 function getFilteredTx() {
   const now = new Date();
   return txLog.filter(t => {
-    if (ssPeriod === 'all') return true;
-    // Parse time string back to date for filtering
+    // Period filter
     const d = new Date(t.time);
-    if (isNaN(d)) return true; // seed data with string times — include all
-    if (ssPeriod === 'today') return d.toDateString() === now.toDateString();
-    if (ssPeriod === 'week') {
-      const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7);
-      return d >= weekAgo;
-    }
-    if (ssPeriod === 'month') {
-      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    const validDate = !isNaN(d);
+    if (ssPeriod === 'today'  && validDate && d.toDateString() !== now.toDateString()) return false;
+    if (ssPeriod === 'week')  { const w = new Date(now); w.setDate(now.getDate()-7); if (validDate && d < w) return false; }
+    if (ssPeriod === 'month'  && validDate && (d.getMonth()!==now.getMonth()||d.getFullYear()!==now.getFullYear())) return false;
+    // Shift filter
+    if (ssShift !== 'all') {
+      const txShift = t.shift || (validDate ? getShift(d) : getShift(new Date()));
+      if (txShift !== ssShift) return false;
     }
     return true;
   });
@@ -3854,11 +3907,14 @@ window.renderTxLog = function() {
   const empFilter    = document.getElementById('txlog-emp-filter').value;
   const payFilter    = document.getElementById('txlog-pay-filter').value;
   const statusFilter = document.getElementById('txlog-status-filter').value;
-  const filtered = txLog.filter(t=>
-    (empFilter==='all'    || t.emp===empFilter) &&
-    (payFilter==='all'    || t.pay===payFilter) &&
-    (statusFilter==='all' || (t.status||'done')===statusFilter)
-  );
+  const shiftFilter  = document.getElementById('txlog-shift-filter').value;
+  const filtered = txLog.filter(t=>{
+    const txShift = t.shift || getShift(new Date(t.time));
+    return (empFilter==='all'    || t.emp===empFilter) &&
+           (payFilter==='all'    || t.pay===payFilter) &&
+           (statusFilter==='all' || (t.status||'done')===statusFilter) &&
+           (shiftFilter==='all'  || txShift===shiftFilter);
+  });
 
   // Employee summary cards — exclude voided from totals
   const empTotals = {};
@@ -4172,6 +4228,12 @@ window.toast = function(msg, type='info') {
   const timer = setTimeout(() => el.remove(), 2800);
   el.dataset.timer = timer;
 };
+
+/* ── SHIFT INIT ─────────────────────────────── */
+updateShiftChip();
+setInterval(updateShiftChip, 60000);
+const ssShiftAllBtn = document.getElementById('ss-shift-all');
+if (ssShiftAllBtn) ssShiftAllBtn.classList.add('active');
 
 })();
 </script>
