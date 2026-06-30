@@ -1016,7 +1016,7 @@ input, select, button, textarea { font-family: var(--font-body); }
   display: flex; align-items: center; gap: 8px;
   padding: 11px 14px; border-radius: var(--r);
   font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg);
-  pointer-events: all; max-width: 360px; margin-left: auto;
+  pointer-events: all; max-width: 320px; margin-left: auto;
   animation: toastIn .22s ease;
 }
 @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -1239,6 +1239,13 @@ input, select, button, textarea { font-family: var(--font-body); }
   transition: all .15s;
 }
 .queue-cancel-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.queue-edit-btn {
+  padding: 11px 14px; border: 1.5px solid var(--slate300); border-radius: var(--r-sm);
+  background: white; color: var(--slate600);
+  font-family: var(--font-body); font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all .15s; display: flex; align-items: center; gap: 5px;
+}
+.queue-edit-btn:hover { border-color: var(--cyan-dark); color: var(--cyan-dark); background: var(--cyan-bg); }
 .queue-empty {
   text-align: center; padding: 60px 20px;
   color: var(--slate300); display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -1281,7 +1288,42 @@ input, select, button, textarea { font-family: var(--font-body); }
 .os-summary-row.os-total span:last-child { color: var(--g600); font-family: var(--font-mono); }
 .os-disc-row { color: var(--blue-dark); font-weight: 700; }
 
-/* Cashier process modal — editable order */
+/* Cashier add-medicine panel */
+.cp-add-panel {
+  margin-bottom: 10px; border: 1.5px solid var(--slate200);
+  border-radius: var(--r-sm); overflow: hidden;
+}
+.cp-add-toggle {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; background: var(--slate100);
+  cursor: pointer; font-size: 12px; font-weight: 700;
+  color: var(--slate600); user-select: none; border: none; width: 100%;
+  font-family: var(--font-body); transition: background .15s;
+}
+.cp-add-toggle:hover { background: var(--slate200); }
+.cp-add-toggle .cp-add-arrow { margin-left: auto; transition: transform .2s; font-size: 10px; }
+.cp-add-toggle.open .cp-add-arrow { transform: rotate(180deg); }
+.cp-add-body { display: none; padding: 8px; background: var(--white); }
+.cp-add-body.open { display: block; }
+.cp-add-search {
+  width: 100%; padding: 8px 10px; border: 1.5px solid var(--slate200);
+  border-radius: var(--r-sm); font-family: var(--font-body); font-size: 13px;
+  outline: none; margin-bottom: 8px; background: var(--slate100);
+}
+.cp-add-search:focus { border-color: #9DCF46; background: white; }
+.cp-prod-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+.cp-prod-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; border-radius: var(--r-sm); cursor: pointer;
+  transition: background .12s; border: 1px solid transparent;
+}
+.cp-prod-option:hover { background: var(--g50); border-color: var(--g200); }
+.cp-prod-option.oos { opacity: .5; cursor: not-allowed; }
+.cp-prod-option-name { font-size: 13px; font-weight: 600; }
+.cp-prod-option-sub { font-size: 10px; color: var(--slate400); margin-top: 1px; }
+.cp-prod-option-right { text-align: right; flex-shrink: 0; }
+.cp-prod-option-price { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--g600); }
+.cp-prod-option-stock { font-size: 10px; color: var(--slate400); }
 .cp-item-row {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 10px; background: var(--slate100);
@@ -1514,6 +1556,12 @@ input, select, button, textarea { font-family: var(--font-body); }
   .main-wrap { margin-left: var(--sidebar-w); padding-bottom: 0; }
   .bottom-nav { display: none !important; }
   .topbar-menu-btn { display: none !important; }
+  /* Move toasts to top-right so they don't overlap the POS order panel */
+  .toast-stack {
+    top: 64px; bottom: auto;
+    right: 16px; left: auto;
+    align-items: flex-end;
+  }
 }
 
 /* Sidebar overlay on mobile */
@@ -2095,17 +2143,23 @@ input, select, button, textarea { font-family: var(--font-body); }
     <div class="modal-handle"></div>
     <div class="modal-title" id="pay-title">💵 Cash Payment</div>
     <div class="modal-sub" id="pay-sub">Total: ₱0.00</div>
-    <div class="cash-input-wrap">
+    <!-- Payment method selector -->
+    <div class="pay-methods" style="margin-bottom:14px">
+      <div class="pay-pill sel" id="pay-pm-cash"  onclick="paySelMethod('cash')">💵 Cash</div>
+      <div class="pay-pill"    id="pay-pm-gcash" onclick="paySelMethod('gcash')">📱 GCash</div>
+      <div class="pay-pill"    id="pay-pm-maya"  onclick="paySelMethod('maya')">💳 Maya</div>
+    </div>
+    <div class="cash-input-wrap" id="pay-cash-wrap">
       <div class="cash-input-label">Amount Tendered</div>
       <input class="cash-input" id="cash-in" type="number" placeholder="0.00" inputmode="decimal" oninput="calcChange()">
     </div>
-    <div class="change-display">
+    <div class="change-display" id="pay-change-display">
       <div class="change-label">Change</div>
       <div class="change-amount" id="change-amt">₱0.00</div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeOverlay('ov-pay')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmPay()">Confirm</button>
+      <button class="btn btn-primary" onclick="confirmPay()" id="pay-confirm-btn">Confirm Payment</button>
     </div>
   </div>
 </div>
@@ -2196,36 +2250,50 @@ input, select, button, textarea { font-family: var(--font-body); }
   </div>
 </div>
 
-<!-- Cashier Process modal (Cashier edits + pays) -->
+<!-- Review Order modal (Cashier reviews, edits, then proceeds to payment) -->
 <div class="overlay" id="ov-cashier-process">
-  <div class="modal">
+  <div class="modal" style="max-height:92vh;display:flex;flex-direction:column;">
     <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-shrink:0">
       <div>
         <div class="modal-title" id="cp-order-num">Order #Q-001</div>
         <div style="font-size:12px;color:var(--slate400)" id="cp-pharmacist-line">By Rodel Cruz · 2 mins ago</div>
       </div>
       <div id="cp-disc-chip" style="margin-left:auto;display:none"></div>
     </div>
-    <!-- Editable items -->
-    <div id="cp-items"></div>
-    <!-- Summary -->
-    <div class="os-summary-block" style="margin-bottom:12px">
-      <div class="os-summary-row"><span>Subtotal</span><span id="cp-subtotal">₱0.00</span></div>
-      <div class="os-summary-row os-disc-row" id="cp-disc-row" style="display:none">
-        <span id="cp-disc-label">Discount</span><span id="cp-disc-amt">−₱0.00</span>
+    <div style="font-size:11px;color:var(--slate400);margin-bottom:12px;flex-shrink:0">Review items below. Add or edit if needed, then proceed to payment.</div>
+    <!-- Scrollable body -->
+    <div style="overflow-y:auto;flex:1;padding-right:2px;">
+      <!-- Editable items -->
+      <div id="cp-items"></div>
+      <!-- Add Medicine panel -->
+      <div class="cp-add-panel" id="cp-add-panel">
+        <button class="cp-add-toggle" id="cp-add-toggle" onclick="cpToggleAddPanel()">
+          ＋ Add Medicine
+          <span class="cp-add-arrow">▼</span>
+        </button>
+        <div class="cp-add-body" id="cp-add-body">
+          <input class="cp-add-search" id="cp-add-search" type="text" placeholder="Search medicine name…" oninput="cpFilterProds(this.value)">
+          <div class="cp-prod-list" id="cp-prod-list"></div>
+        </div>
       </div>
-      <div class="os-summary-row os-total"><span>Total</span><span id="cp-total">₱0.00</span></div>
     </div>
-    <!-- Payment methods -->
-    <div class="pay-methods" style="margin-bottom:10px">
-      <div class="pay-pill sel" id="cp-pm-cash"  onclick="cpSelPay('cash')">💵 Cash</div>
-      <div class="pay-pill"    id="cp-pm-gcash" onclick="cpSelPay('gcash')">📱 GCash</div>
-      <div class="pay-pill"    id="cp-pm-maya"  onclick="cpSelPay('maya')">💳 Maya</div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeOverlay('ov-cashier-process')">Cancel</button>
-      <button class="btn btn-primary" onclick="openCpvForCashier()" id="cp-charge-btn">Charge ₱0.00</button>
+    <!-- Summary + actions (fixed at bottom) -->
+    <div style="flex-shrink:0;margin-top:8px">
+      <div class="os-summary-block" style="margin-bottom:12px">
+        <div class="os-summary-row"><span>Subtotal</span><span id="cp-subtotal">₱0.00</span></div>
+        <div class="os-summary-row os-disc-row" id="cp-disc-row" style="display:none">
+          <span id="cp-disc-label">Discount</span><span id="cp-disc-amt">−₱0.00</span>
+        </div>
+        <div class="os-summary-row os-total"><span>Total</span><span id="cp-total">₱0.00</span></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeOverlay('ov-cashier-process')">Close</button>
+        <button class="btn btn-primary" onclick="cpProceedToPayment()" id="cp-proceed-btn"
+          style="background:linear-gradient(135deg,#9DCF46 0%,#7bbf2e 100%);color:#1a2e04;box-shadow:0 3px 10px rgba(157,207,70,.35)">
+          💳 Proceed to Payment
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -3010,11 +3078,22 @@ window.openOrderSummary = function() {
   openOverlay('ov-order-summary');
 };
 
-// After order summary, open CPV for pharmacist PIN
+// After order summary, open CPV for pharmacist PIN — skip emp grid, use current user
 window.openCpvForQueue = function() {
   closeOverlay('ov-order-summary');
-  cpvContext = 'queue'; // tell CPV what to do after PIN
-  openCpvModal();
+  cpvContext = 'queue';
+  cpvPinBuffer = '';
+  cpvTargetUser = currentUser; // already know who — they're logged in
+  // Skip to PIN state directly
+  document.getElementById('cpv-emp-grid').classList.add('hide');
+  document.getElementById('cpv-pin-state').classList.add('show');
+  document.getElementById('cpv-sel-av').textContent  = currentUser.initials;
+  document.getElementById('cpv-sel-av').style.background = currentUser.color;
+  document.getElementById('cpv-sel-name').textContent = currentUser.name;
+  document.getElementById('cpv-sel-role').textContent = currentUser.role;
+  document.getElementById('cpv-error').textContent = '';
+  updateCpvDots();
+  openOverlay('ov-cashier-pin');
 };
 
 // After pharmacist PIN verified — push order to queue
@@ -3099,7 +3178,7 @@ function renderQueue() {
       </div>
       <div class="queue-card-body">${items}${discLine}</div>
       <div class="queue-card-foot">
-        <button class="queue-process-btn" onclick="openCashierProcess('${o.id}')">💳 Process Payment</button>
+        <button class="queue-process-btn" onclick="openCashierProcess('${o.id}')">👁 Review Order</button>
         <button class="queue-cancel-btn" onclick="cancelQueueOrder('${o.id}')">Cancel</button>
       </div>
     </div>`;
@@ -3118,11 +3197,78 @@ window.cancelQueueOrder = function(id) {
 window.openCashierProcess = function(id) {
   const o = orderQueue.find(x=>x.id===id);
   if (!o) return;
-  activeQueueOrder = JSON.parse(JSON.stringify(o)); // working copy
-  activeQueueOrder.time = new Date(o.time); // restore Date object after JSON clone
+  activeQueueOrder = JSON.parse(JSON.stringify(o));
+  activeQueueOrder.time = new Date(o.time);
   cpPayMethod = 'cash';
+  // Reset add-medicine panel to closed
+  const toggle = document.getElementById('cp-add-toggle');
+  const body   = document.getElementById('cp-add-body');
+  const search = document.getElementById('cp-add-search');
+  if (toggle) toggle.classList.remove('open');
+  if (body)   body.classList.remove('open');
+  if (search) search.value = '';
   renderCashierProcess();
   openOverlay('ov-cashier-process');
+};
+
+// Proceed to Payment — saves any edits then opens pay modal
+window.cpProceedToPayment = function() {
+  // Sync edits back to the original queued order
+  const orig = orderQueue.find(x=>x.id===activeQueueOrder.id);
+  if (orig) {
+    orig.items    = activeQueueOrder.items;
+    orig.subtotal = activeQueueOrder.subtotal;
+    orig.discAmt  = activeQueueOrder.discAmt;
+    orig.total    = activeQueueOrder.total;
+  }
+  closeOverlay('ov-cashier-process');
+  setTimeout(() => openDirectPayment(), 80);
+};
+
+// Done editing — save without proceeding to payment (kept for compatibility)
+window.cpDoneEditing = window.cpProceedToPayment;
+
+// Open payment modal directly
+function openDirectPayment() {
+  const o = activeQueueOrder;
+  cpPayMethod = 'cash'; // reset to cash
+  // Reset pay modal pills
+  ['cash','gcash','maya'].forEach(m => {
+    const el = document.getElementById('pay-pm-'+m);
+    if (el) el.classList.toggle('sel', m==='cash');
+  });
+  document.getElementById('pay-cash-wrap').style.display = '';
+  document.getElementById('pay-change-display').style.display = '';
+  document.getElementById('pay-title').textContent = '💵 Cash Payment';
+  document.getElementById('pay-sub').textContent = `Order ${o.id} · ${pesos(o.total)}`;
+  const ci = document.getElementById('cash-in');
+  ci.value = '';
+  document.getElementById('change-amt').textContent = '₱0.00';
+  window._queueCashier = currentUser;
+  openOverlay('ov-pay');
+  setTimeout(()=>ci.focus(), 150);
+}
+
+// Pay modal method switcher
+window.paySelMethod = function(m) {
+  cpPayMethod = m;
+  ['cash','gcash','maya'].forEach(x => {
+    const el = document.getElementById('pay-pm-'+x);
+    if (el) el.classList.toggle('sel', x===m);
+  });
+  const isCash = m === 'cash';
+  const cashWrap = document.getElementById('pay-cash-wrap');
+  const changeDisp = document.getElementById('pay-change-display');
+  if (cashWrap)   cashWrap.style.display   = isCash ? '' : 'none';
+  if (changeDisp) changeDisp.style.display = isCash ? '' : 'none';
+  const titles = { cash:'💵 Cash Payment', gcash:'📱 GCash Payment', maya:'💳 Maya Payment' };
+  document.getElementById('pay-title').textContent = titles[m];
+  if (!isCash) {
+    // For digital payments, pre-fill exact amount
+    const total = activeQueueOrder ? activeQueueOrder.total
+      : (() => { const s=cart.reduce((sum,c)=>sum+c.price*c.qty,0); return calcDiscounted(s).total; })();
+    document.getElementById('cash-in').value = total.toFixed(2);
+  }
 };
 
 function renderCashierProcess() {
@@ -3172,8 +3318,80 @@ function updateCpSummary() {
     document.getElementById('cp-disc-amt').textContent = '−'+pesos(discAmt);
   } else { dr.style.display = 'none'; }
   document.getElementById('cp-total').textContent = pesos(total);
-  document.getElementById('cp-charge-btn').textContent = `Charge ${pesos(total)}`;
+  // cp-charge-btn removed — payment handled separately
 }
+
+// Toggle the Add Medicine panel open/close
+window.cpToggleAddPanel = function() {
+  const toggle = document.getElementById('cp-add-toggle');
+  const body   = document.getElementById('cp-add-body');
+  const isOpen = body.classList.contains('open');
+  toggle.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    // Populate product list on open
+    cpFilterProds('');
+    setTimeout(() => document.getElementById('cp-add-search').focus(), 80);
+  }
+};
+
+// Filter and render product options
+window.cpFilterProds = function(query) {
+  const q = query.toLowerCase().trim();
+  const results = PRODUCTS.filter(p =>
+    !q ||
+    p.name.toLowerCase().includes(q) ||
+    p.generic.toLowerCase().includes(q) ||
+    p.cat.toLowerCase().includes(q)
+  );
+  const list = document.getElementById('cp-prod-list');
+  if (!results.length) {
+    list.innerHTML = '<div style="padding:12px;text-align:center;font-size:12px;color:var(--slate400)">No medicines found</div>';
+    return;
+  }
+  list.innerHTML = results.map(p => {
+    const totalStock = p.batches.reduce((s, b) => s + b.qty, 0);
+    const bestBatch  = p.batches.filter(b => b.qty > 0).sort((a,b) => new Date(a.exp)-new Date(b.exp))[0]
+                    || p.batches[0];
+    const isOos      = totalStock <= 0;
+    const stockLabel = isOos ? '⚠ Out of stock' : `${totalStock} ${p.unit}s`;
+    return `<div class="cp-prod-option${isOos?' oos':''}" onclick="${isOos?'':(`cpAddProduct(${p.id})`)}" title="${isOos?'Out of stock — will be added as backorder':''}">
+      <div>
+        <div class="cp-prod-option-name">${p.name}</div>
+        <div class="cp-prod-option-sub">${p.generic} · Batch ${bestBatch?bestBatch.id:'—'}</div>
+      </div>
+      <div class="cp-prod-option-right">
+        <div class="cp-prod-option-price">${pesos(p.price)}</div>
+        <div class="cp-prod-option-stock">${stockLabel}</div>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+// Add a product to the active queue order
+window.cpAddProduct = function(productId) {
+  const prod = PRODUCTS.find(p => p.id === productId);
+  if (!prod) return;
+  const bestBatch = prod.batches.filter(b => b.qty > 0).sort((a,b) => new Date(a.exp)-new Date(b.exp))[0]
+                 || prod.batches[0];
+  // Check if already in order — increment qty instead
+  const existing = activeQueueOrder.items.find(i => i.name === prod.name);
+  if (existing) {
+    existing.qty++;
+    toast(`${prod.name} ×${existing.qty}`, 'success');
+  } else {
+    activeQueueOrder.items.push({
+      name: prod.name, price: prod.price, qty: 1,
+      batch: bestBatch ? bestBatch.id : 'N/A',
+      backorder: prod.batches.reduce((s,b)=>s+b.qty,0) <= 0
+    });
+    toast(`${prod.name} added`, 'success');
+  }
+  renderCashierProcess();
+  // Keep search box focused for quick multi-add
+  const searchEl = document.getElementById('cp-add-search');
+  if (searchEl) cpFilterProds(searchEl.value);
+};
 
 window.cpChgQty = function(idx, delta) {
   activeQueueOrder.items[idx].qty += delta;
@@ -3201,7 +3419,7 @@ window.cpSelPay = function(m) {
 // Cashier taps Charge → go straight to payment (cashier already identified by session)
 window.openCpvForCashier = function() {
   closeOverlay('ov-cashier-process');
-  setTimeout(() => processCashierPayment(currentUser), 80);
+  setTimeout(() => openDirectPayment(), 80);
 };
 
 // After cashier PIN verified — open payment modal
@@ -3931,11 +4149,28 @@ document.querySelectorAll('.overlay').forEach(ov=>{
 window.toast = function(msg, type='info') {
   const stack = document.getElementById('toast-stack');
   const icons = { success:'✓', error:'✕', warning:'⚠', info:'ℹ' };
+
+  // Deduplication — if same message already visible, bump a counter instead of stacking
+  const existing = [...stack.querySelectorAll('.toast')].find(t => t.dataset.msg === msg);
+  if (existing) {
+    let count = parseInt(existing.dataset.count || '1') + 1;
+    existing.dataset.count = count;
+    existing.querySelector('.toast-text').textContent = msg + (count > 1 ? ` (×${count})` : '');
+    // Reset auto-remove timer
+    clearTimeout(parseInt(existing.dataset.timer || '0'));
+    const timer = setTimeout(() => existing.remove(), 2800);
+    existing.dataset.timer = timer;
+    return;
+  }
+
   const el = document.createElement('div');
   el.className = `toast t-${type}`;
-  el.innerHTML = `<span>${icons[type]||'ℹ'}</span> ${msg}`;
+  el.dataset.msg = msg;
+  el.dataset.count = '1';
+  el.innerHTML = `<span>${icons[type]||'ℹ'}</span><span class="toast-text">${msg}</span>`;
   stack.appendChild(el);
-  setTimeout(()=>el.remove(), 3200);
+  const timer = setTimeout(() => el.remove(), 2800);
+  el.dataset.timer = timer;
 };
 
 })();
